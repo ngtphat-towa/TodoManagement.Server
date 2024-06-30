@@ -3,5 +3,5 @@
 public abstract class BaseEntity
 {
     public virtual int Id { get; set; }
-    public virtual int DeFlag { get; set; }
+    public virtual bool DeFlag { get; set; }
 }
