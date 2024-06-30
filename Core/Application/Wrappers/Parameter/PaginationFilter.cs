@@ -4,7 +4,6 @@ public class PaginationFilter
 {
     public int PageNumber { get; set; }
     public int PageSize { get; set; }
-    public int? Skip { get; set; }
 
     public PaginationFilter()
     {
@@ -17,6 +16,12 @@ public class PaginationFilter
         PageNumber = pageNumber < 1 ? 1 : pageNumber;
         PageSize = pageSize;
     }
+}
+public record RecordPagination
+{
+    public int TotalPages { get; set; }
+    public int TotalRecords { get; set; }
+
 }
 
 
