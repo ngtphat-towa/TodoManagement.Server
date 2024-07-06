@@ -17,7 +17,7 @@ public record CreateTodoCommand : IRequest<Response<int>>
     /// <summary>
     /// Opening = 1, Progressing = 2, Testing = 3, Done = 4, Rejected = 5,
     /// </summary>
-    public int Status { get; set; }
+    public short Status { get; set; } 
 }
 public class CreateTodoCommandHandler : IRequestHandler<CreateTodoCommand, Response<int>>
 {
@@ -35,6 +35,6 @@ public class CreateTodoCommandHandler : IRequestHandler<CreateTodoCommand, Respo
     {
         var todo = _mapper.Map<Todo>(request);
         var addTodo = await _todoRepository.AddAsync(todo);
-        return new Response<int>(addTodo.Id);
+        return new Response<int>(addTodo.Id, $"Create {nameof(Todo)} successfully");
     }
 }

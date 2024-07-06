@@ -9,5 +9,5 @@ public class Todo : AuditableBaseEntity
     /// <summary>
     /// Opening = 1, Progressing = 2, Testing = 3, Done = 4, Rejected = 5,
     /// </summary>
-    public int Status { get; set; } = (short)TodoStatusEnum.Opening;
+    public short Status { get; set; } = (short)TodoStatusEnum.Opening;
 }

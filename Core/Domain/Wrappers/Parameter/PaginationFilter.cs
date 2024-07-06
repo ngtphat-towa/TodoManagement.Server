@@ -14,7 +14,7 @@ public class PaginationFilter
     public PaginationFilter(int pageNumber, int pageSize)
     {
         PageNumber = pageNumber < 1 ? 1 : pageNumber;
-        PageSize = pageSize;
+        PageSize = pageSize < 1 ? 10 : pageSize;
     }
 }
 public record RecordPagination

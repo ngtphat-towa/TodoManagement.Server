@@ -16,7 +16,7 @@ public class UpdateTodoStatusCommandValidator : AbstractValidator<UpdateTodoStat
         RuleFor(todo => todo.Status)
          .NotEmpty().WithMessage("{PropertyName} is required.")
          .NotNull()
-         .Must(x => Enum.IsDefined(typeof(TodoStatusEnum), x))
+         .Must(x => Enum.IsDefined(typeof(TodoStatusEnum), (int)x))
          .WithMessage("{PropertyName} is not valid.");
     }
 }

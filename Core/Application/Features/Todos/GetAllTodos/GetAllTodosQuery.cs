@@ -9,10 +9,8 @@ using Shared.Wrappers;
 
 namespace Application.Features.Todos.GetAllTodos;
 
-public class GetAllTodosQuery : IRequest<PagedResponse<IEnumerable<Todo>>>
+public class GetAllTodosQuery : PaginationFilter, IRequest<PagedResponse<IEnumerable<Todo>>>
 {
-    public int PageNumber { get; set; }
-    public int PageSize { get; set; }
 }
 public class GetAllTodosQueryHandler : IRequestHandler<GetAllTodosQuery, PagedResponse<IEnumerable<Todo>>>
 {

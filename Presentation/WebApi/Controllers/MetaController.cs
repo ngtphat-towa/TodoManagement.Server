@@ -2,7 +2,9 @@
 
 namespace WebApi.Controllers;
 
-public class MetaController : BaseApiController
+[ApiController]
+[Route("[controller]")]
+public class MetaController : ControllerBase
 {
     [HttpGet]
     public ActionResult Result()
