@@ -13,6 +13,7 @@ public static class RegisterShared
         try
         {
             services.AddScoped<IDateTimeService, DateTimeService>();
+            services.AddScoped<IEmailService, EmailService>();
 
             Console.WriteLine($"Info: {nameof(Shared)} layer initialized successfully.");
         }
