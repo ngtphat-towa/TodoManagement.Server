@@ -9,7 +9,6 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Contracts.Todo;
 using Shared.Wrappers;
-using Azure.Core;
 
 namespace WebApi.Controllers
 {
