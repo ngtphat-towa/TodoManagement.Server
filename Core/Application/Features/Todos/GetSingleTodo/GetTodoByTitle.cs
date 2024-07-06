@@ -7,18 +7,18 @@ using Shared.Wrappers;
 
 namespace Application.Features.Todos.GetSingleTodo;
 
-public record GetTodoByTitleQuery : IRequest<Response<Todo>>
+public record GetSingleTitleQuery : IRequest<Response<Todo>>
 {
     public string Title { get; set; } = string.Empty;
 }
-public class GetTodoByTitleQueryHandler : IRequestHandler<GetTodoByTitleQuery, Response<Todo>>
+public class GetTodoByTitleQueryHandler : IRequestHandler<GetSingleTitleQuery, Response<Todo>>
 {
     private readonly ITodoRepository _todoRepository;
     public GetTodoByTitleQueryHandler(ITodoRepository todoRepository)
     {
         _todoRepository = todoRepository;
     }
-    public async Task<Response<Todo>> Handle(GetTodoByTitleQuery query, CancellationToken cancellationToken)
+    public async Task<Response<Todo>> Handle(GetSingleTitleQuery query, CancellationToken cancellationToken)
     {
         var todo = await _todoRepository.GetByTitleAsync(query.Title);
         if (todo == null) throw new ApiException($"Todo with {query.Title} not found.");

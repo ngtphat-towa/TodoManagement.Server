@@ -13,7 +13,7 @@ public class Response<T>
     public Response(T? data, string? message = null)
     {
         Succeeded = true;
-        Message = message ?? string.Empty;
+        Message = message ?? "Success";
         Data = data;
         Errors = default;
     }
@@ -27,7 +27,7 @@ public class Response<T>
     }
 
     public bool Succeeded { get; set; }
-    public string Message { get; set; } = string.Empty;
-    public string[]? Errors { get; set; } = null;
-    public T? Data { get; set; }
+    public virtual string Message { get; set; }
+    public virtual string[]? Errors { get; set; }
+    public virtual T? Data { get; set; }
 }

@@ -10,7 +10,7 @@ namespace Application.Features.Todos.UpdateTodoStatus;
 public record UpdateTodoStatusCommand : IRequest<Response<int>>
 {
     public int Id { get; set; }
-    public int Status { get; set; }
+    public short Status { get; set; }
 }
 public class UpdateTodoStatusCommandHandler : IRequestHandler<UpdateTodoStatusCommand, Response<int>>
 {
