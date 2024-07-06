@@ -15,15 +15,26 @@ namespace Application
     {
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(RegisterApplication).Assembly));
+            try
+            {
+                services.AddScoped(
+                        typeof(IPipelineBehavior<,>),
+                        typeof(ValidationBehavior<,>));
 
-            services.AddScoped(
-                    typeof(IPipelineBehavior<,>),
-                    typeof(ValidationBehavior<,>));
+                services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
-            services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+                services.AddMappings();
 
-            services.AddMappings();
+                services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(RegisterApplication).Assembly));
+
+
+                Console.WriteLine($"Info: {nameof(Application)} layer initialized successfully.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error initializing {nameof(Application)} layer: {ex.Message}");
+            }
+
 
             return services;
         }

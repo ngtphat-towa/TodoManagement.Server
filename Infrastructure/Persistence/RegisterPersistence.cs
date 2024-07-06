@@ -8,30 +8,41 @@ using Microsoft.Extensions.DependencyInjection;
 using Persistence.Context;
 using Persistence.Repositories;
 
-namespace Persistence;
-
-public static class RegisterPersistence
+namespace Persistence
 {
-    public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
+    public static class RegisterPersistence
     {
-        var isMemoryData = configuration.GetValue<bool>("UseInMemoryDatabase");
-        Console.WriteLine(isMemoryData);
-        if (isMemoryData)
+        public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseInMemoryDatabase("ApplicationDb"));
+            var isMemoryData = configuration.GetValue<bool>("UseInMemoryDatabase");
+
+            try
+            {
+                if (isMemoryData)
+                {
+                    services.AddDbContext<ApplicationDbContext>(options =>
+                        options.UseInMemoryDatabase("ApplicationDb"));
+                }
+                else
+                {
+                    services.AddDbContext<ApplicationDbContext>(options =>
+                        options.UseSqlServer(
+                            configuration.GetConnectionString("DefaultConnection")
+                        ));
+                }
+
+                // Register repositories
+                services.AddScoped(typeof(IGenericRepositoryAsync<>), typeof(GenericRepository<>));
+                services.AddTransient<ITodoRepository, TodoRepository>();
+
+                Console.WriteLine($"Info: {nameof(Persistence)} layer initialized successfully.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error initializing {nameof(Persistence)} layer: {ex.Message}");
+            }
+
+            return services;
         }
-        else
-        {
-            services.AddDbContext<ApplicationDbContext>(options =>
-           options.UseSqlServer(
-               configuration.GetConnectionString("DefaultConnection")
-             ));
-        }
-        #region Repositories
-        services.AddScoped(typeof(IGenericRepositoryAsync<>), typeof(GenericRepository<>));
-        services.AddTransient<ITodoRepository, TodoRepository>();
-        #endregion
-        return services;
     }
 }
