@@ -84,7 +84,7 @@ namespace Identity.Services
                 RefreshToken = GenerateRefreshToken(ipAddress).Token
             };
 
-            return new Response<AuthenticationResponse>(response, $"Authenticated {user.UserName}");
+            return Response<AuthenticationResponse>.Success(response, $"Authenticated {user.UserName}");
         }
 
         public async Task<Response<string>> RegisterAsync(RegisterRequest request, string origin)
@@ -124,7 +124,7 @@ namespace Identity.Services
                     Subject = "Confirm Registration"
                 });
 
-                return new Response<string>(user.Id, $"User Registered. Please confirm your account by visiting this URL {verificationUri}");
+                return Response<string>.Success(user.Id, $"User Registered. Please confirm your account by visiting this URL {verificationUri}");
             }
             else
             {
@@ -144,7 +144,7 @@ namespace Identity.Services
             var result = await _userManager.ConfirmEmailAsync(user, code);
             if (result.Succeeded)
             {
-                return new Response<string>(
+                return Response<string>.Success(
                     user.Id,
                     $"Account Confirmed for {user.Email}. You can now use the /api/Account/authenticate endpoint.");
             }
@@ -187,7 +187,7 @@ namespace Identity.Services
             var result = await _userManager.ResetPasswordAsync(account, model.Token, model.Password);
             if (result.Succeeded)
             {
-                return new Response<string>(model.Email, $"Password Resetted.");
+                return Response<string>.Success(model.Email, $"Password Resetted.");
             }
             else
             {

@@ -44,15 +44,25 @@ namespace WebApi.Controllers
         {
             var query = request.Adapt<GetAllTodosQuery>();
             var response = await _mediator.Send(query);
-            return Ok(response);
+            var userResponses = response.Data.Adapt<IEnumerable<TodoResponse>>();
+
+            return Ok(new PagedResponse<IEnumerable<TodoResponse>>(
+                userResponses,
+                response.PageNumber,
+                response.PageSize,
+                response.TotalPages,
+                response.TotalRecords));
         }
 
         [HttpGet("get-by-id")]
         public async Task<IActionResult> GetById([FromQuery] GetTodoByIdRequest request)
         {
-            var query = request.Adapt<GetSingleByIdQuery>();
+            var query = request.Adapt<GetTodoByIdQuery>();
             var response = await _mediator.Send(query);
-            return Ok(response);
+
+            var todoResponse = response.Data.Adapt<TodoResponse>();
+
+            return Ok(Response<TodoResponse>.Success(todoResponse));
         }
 
         [HttpPost("get-by-title")]
@@ -61,7 +71,10 @@ namespace WebApi.Controllers
 
             var query = request.Adapt<GetSingleTitleQuery>();
             var response = await _mediator.Send(query);
-            return Ok(response);
+
+            var todoResponse = response.Data.Adapt<TodoResponse>();
+
+            return Ok(Response<TodoResponse>.Success(todoResponse));
         }
 
         [HttpPut("update")]

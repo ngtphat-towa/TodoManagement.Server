@@ -2,8 +2,6 @@
 
 using Microsoft.OpenApi.Models;
 
-using WebApi.Services;
-
 namespace WebApi
 {
     public static class RegisterPresentation
@@ -42,9 +40,7 @@ namespace WebApi
                     });
                 });
 
-                services.AddHttpContextAccessor();
-                services.AddScoped<IAuthenticatedUserService, AuthenticatedUserService>();
-             
+                services.AddHttpContextAccessor();       
                 Console.WriteLine($"Info: {nameof(WebApi)} layer initialized successfully.");
             }
             catch (Exception ex)
