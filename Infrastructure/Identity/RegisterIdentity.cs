@@ -65,6 +65,7 @@ namespace Identity
         private static void ConfigureAuthentication(IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<JwtSettings>(configuration.GetSection("JWTSettings"));
+            services.Configure<MailSettings>(configuration.GetSection("MailSettings"));
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

@@ -31,8 +31,8 @@ public class UpdateTodoStatusCommandHandler : IRequestHandler<UpdateTodoStatusCo
 
         exitingTodo.Status = request.Status;
 
-        var addTodo = await _todoRepository.AddAsync(exitingTodo);
+        await _todoRepository.UpdateAsync(exitingTodo);
 
-        return new Response<int>(addTodo.Id);
+        return new Response<int>(exitingTodo.Id);
     }
 }

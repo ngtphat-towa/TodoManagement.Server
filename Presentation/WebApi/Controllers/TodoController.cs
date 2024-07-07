@@ -9,18 +9,25 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Contracts.Todo;
 using Shared.Wrappers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebApi.Controllers
 {
+    [Authorize]
     public class TodoController : BaseApiController
     {
-        public TodoController(IMediator mediator) : base(mediator) { }
+        private readonly IMediator _mediator;
+
+        public TodoController(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
 
         [HttpPost("create")]
         public async Task<IActionResult> Create([FromBody] CreateTodoRequest request)
         {
             var command = request.Adapt<CreateTodoCommand>();
-            var response = await Mediator.Send(command);
+            var response = await _mediator.Send(command);
             return Ok(response);
         }
 
@@ -28,7 +35,7 @@ namespace WebApi.Controllers
         public async Task<IActionResult> Delete([FromQuery] DeleteTodoRequest request)
         {
             var command = request.Adapt<DeleteTodoCommand>();
-            var response = await Mediator.Send(command);
+            var response = await _mediator.Send(command);
             return Ok(response);
         }
 
@@ -36,7 +43,7 @@ namespace WebApi.Controllers
         public async Task<IActionResult> GetAll([FromQuery] PaginationFilter request)
         {
             var query = request.Adapt<GetAllTodosQuery>();
-            var response = await Mediator.Send(query);
+            var response = await _mediator.Send(query);
             return Ok(response);
         }
 
@@ -44,7 +51,7 @@ namespace WebApi.Controllers
         public async Task<IActionResult> GetById([FromQuery] GetTodoByIdRequest request)
         {
             var query = request.Adapt<GetSingleByIdQuery>();
-            var response = await Mediator.Send(query);
+            var response = await _mediator.Send(query);
             return Ok(response);
         }
 
@@ -53,7 +60,7 @@ namespace WebApi.Controllers
         {
 
             var query = request.Adapt<GetSingleTitleQuery>();
-            var response = await Mediator.Send(query);
+            var response = await _mediator.Send(query);
             return Ok(response);
         }
 
@@ -61,7 +68,7 @@ namespace WebApi.Controllers
         public async Task<IActionResult> Update([FromBody] UpdateTodoRequest request)
         {
             var command = request.Adapt<UpdateTodoCommand>();
-            var response = await Mediator.Send(command);
+            var response = await _mediator.Send(command);
             return Ok(response);
         }
 
@@ -69,7 +76,7 @@ namespace WebApi.Controllers
         public async Task<IActionResult> UpdateStatus([FromBody] UpdateTodoStatusRequest request)
         {
             var command = request.Adapt<UpdateTodoStatusCommand>();
-            var response = await Mediator.Send(command);
+            var response = await _mediator.Send(command);
             return Ok(response);
         }
     }

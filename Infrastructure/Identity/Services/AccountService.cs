@@ -112,7 +112,9 @@ namespace Identity.Services
             var result = await _userManager.CreateAsync(user, request.Password);
             if (result.Succeeded)
             {
+                UserPermissionHelper.InitializePermissions(user, Roles.Basic);
                 await _userManager.AddToRoleAsync(user, Roles.Basic.ToString());
+
                 var verificationUri = await SendVerificationEmail(user, origin);
                 await _emailService.SendAsync(new EmailRequest
                 {
@@ -197,18 +199,22 @@ namespace Identity.Services
         {
             var userClaims = await _userManager.GetClaimsAsync(user);
             var roles = await _userManager.GetRolesAsync(user);
+            var permissions = UserPermissionHelper.GetPermissions(user.Permissions); // Assuming user.Permissions is a list of permission strings
+
             var roleClaims = roles.Select(role => new Claim(ClaimTypes.Role, role)).ToList();
+            var permissionsClaims = permissions.Select(permissions => new Claim("permissions", permissions)).ToList();
 
             var claims = new List<Claim>
-            {
-                new(ClaimTypes.NameIdentifier, user.Id),
-                new(ClaimTypes.Name, user.UserName!),
-                new(ClaimTypes.Email, user.Email!),
-                new("uid", user.Id),
-                new("ip", IpHelper.GetIpAddress())
-            }
+    {
+                new (ClaimTypes.NameIdentifier, user.Id),
+                new (ClaimTypes.Name, user.UserName!),
+                new (ClaimTypes.Email, user.Email!),
+                new ("uid", user.Id),
+                new ("ip", IpHelper.GetIpAddress())
+    }
             .Union(userClaims)
-            .Union(roleClaims);
+            .Union(roleClaims)
+            .Union(permissionsClaims);
 
             var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
             var signingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
@@ -253,6 +259,18 @@ namespace Identity.Services
             randomNumberGenerator.GetBytes(randomBytes);
             // convert random bytes to hex string
             return BitConverter.ToString(randomBytes).Replace("-", "");
+        }
+        private static void InitializePermissions(ApplicationUser user, Roles role)
+        {
+            var permissions = UserPermissionHelper.GetPermissionsForRole(role);
+            foreach (var permission in permissions)
+            {
+                var parts = permission.Split("_");
+                if (parts.Length == 2 && Enum.TryParse(parts[0], out ControllerPermission controller) && Enum.TryParse(parts[1], out ActionPermission action))
+                {
+                    user.AddPermission(controller, action);
+                }
+            }
         }
     }
 }
