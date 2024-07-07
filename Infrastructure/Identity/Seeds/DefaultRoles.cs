@@ -53,7 +53,7 @@ namespace Identity.Seeds
                 if (result.Succeeded)
                 {
                     await userManager.AddToRoleAsync(newUser, role.ToString());
-                    InitializePermissions(newUser, role);
+                    UserPermissionHelper.InitializePermissions(newUser, role);
                 }
                 else
                 {
@@ -64,21 +64,10 @@ namespace Identity.Seeds
             {
                 // Update user if needed
                 await userManager.AddToRoleAsync(existingUser, role.ToString());
-                InitializePermissions(existingUser, role);
+                UserPermissionHelper.InitializePermissions(existingUser, role);
             }
         }
 
-        private static void InitializePermissions(ApplicationUser user, Roles role)
-        {
-            var permissions = UserPermissionHelper.GetPermissionsForRole(role);
-            foreach (var permission in permissions)
-            {
-                var parts = permission.Split("_");
-                if (parts.Length == 2 && Enum.TryParse(parts[0], out ControllerPermission controller) && Enum.TryParse(parts[1], out ActionPermission action))
-                {
-                    user.AddPermission(controller, action);
-                }
-            }
-        }
+       
     }
 }

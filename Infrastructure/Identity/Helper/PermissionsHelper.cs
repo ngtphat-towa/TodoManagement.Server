@@ -53,7 +53,6 @@ namespace Identity.Models
                         $"{ControllerPermission.USER}_{ActionPermission.VIEW}",
                         $"{ControllerPermission.USER}_{ActionPermission.EDIT}",
                         $"{ControllerPermission.USER}_{ActionPermission.DELETE}"
-                        // Add more permissions as needed
                     });
                     break;
                 case Roles.Admin:
@@ -65,7 +64,6 @@ namespace Identity.Models
                         $"{ControllerPermission.USER}_{ActionPermission.VIEW}",
                         $"{ControllerPermission.USER}_{ActionPermission.EDIT}",
                         $"{ControllerPermission.USER}_{ActionPermission.DELETE}"
-                        // Add more permissions as needed
                     });
                     break;
                 case Roles.Moderator:
@@ -73,7 +71,6 @@ namespace Identity.Models
                     {
                         $"{ControllerPermission.TODO}_{ActionPermission.VIEW}",
                         $"{ControllerPermission.USER}_{ActionPermission.VIEW}"
-                        // Add more permissions as needed
                     });
                     break;
                 case Roles.Basic:
@@ -81,12 +78,23 @@ namespace Identity.Models
                     {
                         $"{ControllerPermission.TODO}_{ActionPermission.VIEW}",
                         $"{ControllerPermission.USER}_{ActionPermission.VIEW}"
-                        // Add more permissions as needed
                     });
                     break;
             }
 
             return permissions;
+        }
+        public static void InitializePermissions(ApplicationUser user, Roles role)
+        {
+            List<string> permissions = GetPermissionsForRole(role);
+            foreach (var permission in permissions)
+            {
+                var parts = permission.Split("_");
+                if (parts.Length == 2 && Enum.TryParse(parts[0], out ControllerPermission controller) && Enum.TryParse(parts[1], out ActionPermission action))
+                {
+                    user.AddPermission(controller, action);
+                }
+            }
         }
     }
 }
