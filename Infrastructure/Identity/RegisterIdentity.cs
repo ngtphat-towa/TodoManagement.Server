@@ -1,5 +1,6 @@
 ﻿using System.Text;
 
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 
 using Domain.Settings;
@@ -8,6 +9,8 @@ using Identity.Context;
 using Identity.Models;
 using Identity.Seeds;
 using Identity.Services;
+
+using Infrastructure.Persistence.Repositories;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
@@ -33,6 +36,9 @@ namespace Identity
             SeedIdentityData(services);
 
             services.AddTransient<IAccountService, AccountService>();
+            services.AddTransient<IUserService, UserService>();
+            services.AddScoped<IAuthenticatedUserService, AuthenticatedUserService>();
+            services.AddScoped<IJwtService, JwtService>();
 
             Console.WriteLine($"Info: {nameof(Identity)} layer initialized successfully.");
 
@@ -100,14 +106,14 @@ namespace Identity
                         context.HandleResponse();
                         context.Response.StatusCode = 401;
                         context.Response.ContentType = "application/json";
-                        var result = JsonConvert.SerializeObject(new Response<string>("You are not Authorized"));
+                        var result = JsonConvert.SerializeObject(Response<bool>.Failure("You are not Authorized"));
                         return context.Response.WriteAsync(result);
                     },
                     OnForbidden = context =>
                     {
                         context.Response.StatusCode = 403;
                         context.Response.ContentType = "application/json";
-                        var result = JsonConvert.SerializeObject(new Response<string>("You are not authorized to access this resource"));
+                        var result = JsonConvert.SerializeObject(Response<bool>.Failure("You are not authorized to access this resource"));
                         return context.Response.WriteAsync(result);
                     },
                 };

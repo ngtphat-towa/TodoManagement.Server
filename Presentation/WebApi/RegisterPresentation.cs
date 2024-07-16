@@ -1,8 +1,4 @@
-﻿using Application.Interfaces.Services;
-
-using Microsoft.OpenApi.Models;
-
-using WebApi.Services;
+﻿using Microsoft.OpenApi.Models;
 
 namespace WebApi
 {
@@ -42,9 +38,7 @@ namespace WebApi
                     });
                 });
 
-                services.AddHttpContextAccessor();
-                services.AddScoped<IAuthenticatedUserService, AuthenticatedUserService>();
-             
+                services.AddHttpContextAccessor();       
                 Console.WriteLine($"Info: {nameof(WebApi)} layer initialized successfully.");
             }
             catch (Exception ex)

@@ -35,6 +35,6 @@ public class CreateTodoCommandHandler : IRequestHandler<CreateTodoCommand, Respo
     {
         var todo = _mapper.Map<Todo>(request);
         var addTodo = await _todoRepository.AddAsync(todo);
-        return new Response<int>(addTodo.Id, $"Create {nameof(Todo)} successfully");
+        return Response<int>.Success(addTodo.Id, $"Create {nameof(Todo)} successfully");
     }
 }

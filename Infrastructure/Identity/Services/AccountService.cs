@@ -5,20 +5,16 @@ using Contracts.Accounts;
 using Contracts.Email;
 
 using Domain.Enums;
-using Domain.Settings;
 
-using Identity.Helpers;
 using Identity.Models;
+
+using Mapster;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 
 using Shared.Wrappers;
 
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -30,19 +26,19 @@ namespace Identity.Services
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailService _emailService;
-        private readonly JwtSettings _jwtSettings;
+        private readonly IJwtService _jwtService;
         private readonly IDateTimeService _dateTimeService;
 
         public AccountService(UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
-            IOptions<JwtSettings> jwtSettings,
+            IJwtService jwtService,
             IDateTimeService dateTimeService,
             SignInManager<ApplicationUser> signInManager,
             IEmailService emailService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
-            _jwtSettings = jwtSettings.Value;
+            _jwtService = jwtService;
             _dateTimeService = dateTimeService;
             _signInManager = signInManager;
             _emailService = emailService;
@@ -72,19 +68,19 @@ namespace Identity.Services
                 throw new ApiException($"Account Not Confirmed for '{request.Email}'.");
             }
 
-            var jwtSecurityToken = await GenerateJWToken(user);
+            var token = await _jwtService.GenerateToken(user);
             var response = new AuthenticationResponse
             {
                 Id = user.Id,
-                JWToken = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken),
+                JWToken =token,
                 Email = user.Email!,
                 UserName = user.UserName!,
-                Roles = (await _userManager.GetRolesAsync(user)).ToList(),
+                Roles = [.. (await _userManager.GetRolesAsync(user))],
                 IsVerified = user.EmailConfirmed,
                 RefreshToken = GenerateRefreshToken(ipAddress).Token
             };
 
-            return new Response<AuthenticationResponse>(response, $"Authenticated {user.UserName}");
+            return Response<AuthenticationResponse>.Success(response, $"Authenticated {user.UserName}");
         }
 
         public async Task<Response<string>> RegisterAsync(RegisterRequest request, string origin)
@@ -95,13 +91,8 @@ namespace Identity.Services
                 throw new ApiException($"Username '{request.UserName}' is already taken.");
             }
 
-            var user = new ApplicationUser
-            {
-                Email = request.Email,
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                UserName = request.UserName
-            };
+            var user = request.Adapt<ApplicationUser>();
+          
 
             var userWithSameEmail = await _userManager.FindByEmailAsync(request.Email);
             if (userWithSameEmail != null)
@@ -119,12 +110,12 @@ namespace Identity.Services
                 await _emailService.SendAsync(new EmailRequest
                 {
                     From = "mail@quingfa.com",
-                    To = user.Email,
+                    To = user.Email!,
                     Body = $"Please confirm your account by visiting this URL {verificationUri}",
                     Subject = "Confirm Registration"
                 });
 
-                return new Response<string>(user.Id, $"User Registered. Please confirm your account by visiting this URL {verificationUri}");
+                return Response<string>.Success(user.Id, $"User Registered. Please confirm your account by visiting this URL {verificationUri}");
             }
             else
             {
@@ -144,7 +135,7 @@ namespace Identity.Services
             var result = await _userManager.ConfirmEmailAsync(user, code);
             if (result.Succeeded)
             {
-                return new Response<string>(
+                return Response<string>.Success(
                     user.Id,
                     $"Account Confirmed for {user.Email}. You can now use the /api/Account/authenticate endpoint.");
             }
@@ -187,46 +178,12 @@ namespace Identity.Services
             var result = await _userManager.ResetPasswordAsync(account, model.Token, model.Password);
             if (result.Succeeded)
             {
-                return new Response<string>(model.Email, $"Password Resetted.");
+                return Response<string>.Success(model.Email, $"Password Resetted.");
             }
             else
             {
                 throw new ApiException($"Error occurred while resetting the password.");
             }
-        }
-
-        private async Task<JwtSecurityToken> GenerateJWToken(ApplicationUser user)
-        {
-            var userClaims = await _userManager.GetClaimsAsync(user);
-            var roles = await _userManager.GetRolesAsync(user);
-            var permissions = UserPermissionHelper.GetPermissions(user.Permissions); // Assuming user.Permissions is a list of permission strings
-
-            var roleClaims = roles.Select(role => new Claim(ClaimTypes.Role, role)).ToList();
-            var permissionsClaims = permissions.Select(permissions => new Claim("permissions", permissions)).ToList();
-
-            var claims = new List<Claim>
-    {
-                new (ClaimTypes.NameIdentifier, user.Id),
-                new (ClaimTypes.Name, user.UserName!),
-                new (ClaimTypes.Email, user.Email!),
-                new ("uid", user.Id),
-                new ("ip", IpHelper.GetIpAddress())
-    }
-            .Union(userClaims)
-            .Union(roleClaims)
-            .Union(permissionsClaims);
-
-            var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
-            var signingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
-
-            var jwtSecurityToken = new JwtSecurityToken(
-                issuer: _jwtSettings.Issuer,
-                audience: _jwtSettings.Audience,
-                claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(_jwtSettings.DurationInMinutes),
-                signingCredentials: signingCredentials);
-
-            return jwtSecurityToken;
         }
 
         private RefreshToken GenerateRefreshToken(string ipAddress)

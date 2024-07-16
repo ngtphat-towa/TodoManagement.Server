@@ -32,6 +32,6 @@ public class DeleteTodoCommandHandler : IRequestHandler<DeleteTodoCommand, Respo
 
         var addTodo = await _todoRepository.AddAsync(exitingTodo);
 
-        return new Response<int>(addTodo.Id);
+        return Response<int>.Success(addTodo.Id);
     }
 }

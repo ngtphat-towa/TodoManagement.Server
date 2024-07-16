@@ -52,8 +52,8 @@ namespace Identity.Seeds
                 var result = await userManager.CreateAsync(newUser, password);
                 if (result.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(newUser, role.ToString());
                     UserPermissionHelper.InitializePermissions(newUser, role);
+                    await userManager.AddToRoleAsync(newUser, role.ToString());
                 }
                 else
                 {

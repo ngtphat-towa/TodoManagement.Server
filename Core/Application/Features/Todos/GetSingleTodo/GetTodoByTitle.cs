@@ -22,6 +22,6 @@ public class GetTodoByTitleQueryHandler : IRequestHandler<GetSingleTitleQuery, R
     {
         var todo = await _todoRepository.GetByTitleAsync(query.Title);
         if (todo == null) throw new ApiException($"Todo with {query.Title} not found.");
-        return new Response<Todo>(todo);
+        return Response<Todo>.Success(todo);
     }
 }

@@ -8,5 +8,5 @@ public enum TodoStatusEnum
     Progressing = 2,
     Testing = 3,
     Done = 4,
-    Rejected = 5,
+    Rejected = 5
 }

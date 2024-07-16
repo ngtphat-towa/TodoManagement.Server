@@ -33,6 +33,6 @@ public class UpdateTodoStatusCommandHandler : IRequestHandler<UpdateTodoStatusCo
 
         await _todoRepository.UpdateAsync(exitingTodo);
 
-        return new Response<int>(exitingTodo.Id);
+        return Response<int>.Success(exitingTodo.Id);
     }
 }

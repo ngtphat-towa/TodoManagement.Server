@@ -9,12 +9,12 @@ using Shared.Wrappers;
 
 namespace Application.Features.Todos.GetSingleTodo;
 
-public class GetSingleByIdQuery : IRequest<Response<Todo>>
+public class GetTodoByIdQuery : IRequest<Response<Todo>>
 {
     public int Id { get; set; }
 }
 
-public class GetTodoByIdQueryHandler : IRequestHandler<GetSingleByIdQuery, Response<Todo>>
+public class GetTodoByIdQueryHandler : IRequestHandler<GetTodoByIdQuery, Response<Todo>>
 {
     private readonly ITodoRepository _todoRepository;
 
@@ -23,7 +23,7 @@ public class GetTodoByIdQueryHandler : IRequestHandler<GetSingleByIdQuery, Respo
         _todoRepository = todoRepository;
     }
 
-    public async Task<Response<Todo>> Handle(GetSingleByIdQuery query, CancellationToken cancellationToken)
+    public async Task<Response<Todo>> Handle(GetTodoByIdQuery query, CancellationToken cancellationToken)
     {
         Todo? todo = null;
 
@@ -38,6 +38,6 @@ public class GetTodoByIdQueryHandler : IRequestHandler<GetSingleByIdQuery, Respo
             throw new ApiException($"Todo not found.");
         }
 
-        return new Response<Todo>(todo);
+        return Response<Todo>.Success(todo);
     }
 }
