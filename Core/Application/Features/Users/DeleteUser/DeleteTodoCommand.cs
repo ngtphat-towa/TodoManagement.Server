@@ -9,7 +9,7 @@ namespace Application.Features.Users.DeleteUser;
 
 public record DeleteUserCommand : IRequest<Response<string>>
 {
-    public string Id { get; set; }
+    public string Id { get; set; } = string.Empty;
 }
 public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Response<string>>
 {
@@ -20,12 +20,12 @@ public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Respo
         _userService = userService;
     }
 
-    public async Task<Response<string>> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
+    public async Task<Response<string>> Handle(DeleteUserCommand command, CancellationToken cancellationToken)
     {
-        var exitingUser = await _userService.GetByIdAsync(request.Id);
+        var exitingUser = await _userService.GetByIdAsync(command.Id);
         if (exitingUser is null)
         {
-            throw new ApiException($"Product Not Found.");
+            throw new ApiException($"Todo with ID '{command.Id}' not found.");
         }
 
         await _userService.DeleteAsync(exitingUser);

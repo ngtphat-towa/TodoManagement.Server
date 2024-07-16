@@ -1,6 +1,4 @@
-﻿using Application.Interfaces.Common;
-
-using Domain.Entities;
+﻿using Domain.Entities;
 
 using Shared.Wrappers;
 

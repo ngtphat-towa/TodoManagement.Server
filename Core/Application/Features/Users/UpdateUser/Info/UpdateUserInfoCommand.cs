@@ -1,18 +1,18 @@
 ﻿using Application.Interfaces.Repositories;
 
 using MediatR;
+
 using Shared.Wrappers;
 
-namespace Application.Features.Users.UpdateUser
+namespace Application.Features.Users.UpdateUser.Info
 {
-    public class UpdateUserCommand: IRequest<Response<Unit>>
+    public class UpdateUserInfoCommand : IRequest<Response<Unit>>
     {
         public string Id { get; set; } = string.Empty;
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
-        public short Role { get; set; }
     }
-    public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Response<Unit>>
+    public class UpdateUserCommandHandler : IRequestHandler<UpdateUserInfoCommand, Response<Unit>>
     {
         private readonly IUserService _userService;
 
@@ -21,7 +21,7 @@ namespace Application.Features.Users.UpdateUser
             _userService = userService;
         }
 
-        public async Task<Response<Unit>> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
+        public async Task<Response<Unit>> Handle(UpdateUserInfoCommand request, CancellationToken cancellationToken)
         {
             var user = await _userService.GetByIdAsync(request.Id);
             if (user == null)
@@ -30,7 +30,6 @@ namespace Application.Features.Users.UpdateUser
             }
             user.FirstName = request.FirstName;
             user.LastName = request.LastName;
-            user.Role = request.Role;
 
             await _userService.UpdateAsync(user);
 

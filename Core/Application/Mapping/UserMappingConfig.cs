@@ -1,5 +1,4 @@
-﻿using Contracts.Todo;
-using Contracts.User;
+﻿using Contracts.User;
 
 using Domain.Entities;
 

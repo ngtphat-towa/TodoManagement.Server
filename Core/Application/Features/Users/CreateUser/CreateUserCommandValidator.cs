@@ -14,44 +14,62 @@ namespace Application.Features.Users.CreateUser
 
             RuleFor(x => x.FirstName).NotEmpty().WithMessage("First name is required.");
             RuleFor(x => x.LastName).NotEmpty().WithMessage("Last name is required.");
-            RuleFor(x => x.Username).NotEmpty().WithMessage("Username is required.");
+            RuleFor(x => x.UserName).NotEmpty().WithMessage("Username is required.");
             RuleFor(x => x.Password).NotEmpty().WithMessage("Password is required.");
             RuleFor(x => x.Email).NotEmpty().EmailAddress().WithMessage("Invalid email address.");
 
-            RuleFor(x => x.Role).Must(role => CanCreateUserWithRole(role))
+            RuleFor(x => x.Role)
+                .Must(IsEnumDefined)
+                .WithMessage("Invalid role specified.")
+                .Must(CanCreateUserWithRole)
                 .WithMessage("You do not have permission to create a user with this role.");
         }
 
-        private bool CanCreateUserWithRole(short roleToCreate)
+        private bool IsEnumDefined(short roleNumber)
         {
-            var authenticatedRole = _authenticatedUserService.Roles.FirstOrDefault();
+            return Enum.IsDefined(typeof(Roles), roleNumber);
+        }
 
-            if (authenticatedRole == null)
+        private bool CanCreateUserWithRole(short roles)
+        {
+            var currentUserRoles = _authenticatedUserService.Roles;
+
+            if (currentUserRoles == null || !currentUserRoles.Any())
             {
                 return false;
             }
 
-            if (!Enum.TryParse(typeof(Roles), authenticatedRole, out object? parsedAuthenticatedRole))
+            if (!Enum.IsDefined(typeof(Roles), roles))
             {
                 return false;
+
             }
 
-            Roles authenticatedUserRole = (Roles)parsedAuthenticatedRole;
+            var roleToCheck = (Roles)roles;
 
-            // Check permissions based on role hierarchy
-            switch (authenticatedUserRole)
+            // Check if the current user has the necessary permissions based on their role
+            foreach (var currentUserRole in currentUserRoles)
             {
-                case Roles.SuperAdmin:
+                if (!Enum.TryParse(typeof(Roles), currentUserRole, out object? parsedCurrentUserRole))
+                {
+                    continue;
+                }
+
+                Roles authenticatedUserRole = (Roles)parsedCurrentUserRole;
+
+                // SuperAdmin can create any user
+                if (authenticatedUserRole == Roles.SuperAdmin)
+                {
                     return true;
-                case Roles.Admin:
-                    return roleToCreate < (short)Roles.Admin;
-                case Roles.Moderator:
-                    return roleToCreate < (short)Roles.Moderator;
-                case Roles.Basic:
-                    return false;
-                default:
-                    return false;
+                }
+                // Non-Super Admin can only create user below them
+                if (roleToCheck.IsLowerOrBasic(authenticatedUserRole))
+                {
+                    return true;
+                }
             }
+
+            return false;
         }
 
     }

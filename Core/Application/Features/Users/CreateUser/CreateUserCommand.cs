@@ -2,6 +2,8 @@
 
 using Domain.Entities;
 
+using Mapster;
+
 using MediatR;
 
 using Shared.Wrappers;
@@ -12,7 +14,7 @@ public class CreateUserCommand : IRequest<Response<string>>
 {
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
-    public string Username { get; set; } = string.Empty;
+    public string UserName { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     /// <summary>
@@ -30,19 +32,9 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Respo
         _userService = userService;
     }
 
-    public async Task<Response<string>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
+    public async Task<Response<string>> Handle(CreateUserCommand command, CancellationToken cancellationToken)
     {
-        var newUser = new User
-        {
-            FirstName = request.FirstName,
-            LastName = request.LastName,
-            UserName = request.Username,
-            Password = request.Password,
-            Email = request.Email,
-            Role = request.Role,
-            Permissions = request.Permissions
-        };
-
+        var newUser = command.Adapt<User>();
         var addedUser = await _userService.AddAsync(newUser);
         return Response<string>.Success(addedUser.Id);
 
