@@ -47,11 +47,11 @@ namespace Identity.Models
                     {
                         $"{ControllerPermission.TODO}_{ActionPermission.CREATE}",
                         $"{ControllerPermission.TODO}_{ActionPermission.VIEW}",
-                        $"{ControllerPermission.TODO}_{ActionPermission.EDIT}",
+                        $"{ControllerPermission.TODO}_{ActionPermission.UPDATE}",
                         $"{ControllerPermission.TODO}_{ActionPermission.DELETE}",
                         $"{ControllerPermission.USER}_{ActionPermission.CREATE}",
                         $"{ControllerPermission.USER}_{ActionPermission.VIEW}",
-                        $"{ControllerPermission.USER}_{ActionPermission.EDIT}",
+                        $"{ControllerPermission.USER}_{ActionPermission.UPDATE}",
                         $"{ControllerPermission.USER}_{ActionPermission.DELETE}"
                     });
                     break;
@@ -62,7 +62,7 @@ namespace Identity.Models
                         $"{ControllerPermission.TODO}_{ActionPermission.VIEW}",
                         $"{ControllerPermission.USER}_{ActionPermission.CREATE}",
                         $"{ControllerPermission.USER}_{ActionPermission.VIEW}",
-                        $"{ControllerPermission.USER}_{ActionPermission.EDIT}",
+                        $"{ControllerPermission.USER}_{ActionPermission.UPDATE}",
                         $"{ControllerPermission.USER}_{ActionPermission.DELETE}"
                     });
                     break;

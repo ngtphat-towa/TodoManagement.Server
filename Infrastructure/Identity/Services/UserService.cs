@@ -1,8 +1,6 @@
 ﻿using Application.Exceptions;
 using Application.Interfaces.Repositories;
 
-using Azure.Core;
-
 using Domain.Entities;
 using Domain.Enums;
 

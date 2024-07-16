@@ -38,6 +38,7 @@ namespace Identity
             services.AddTransient<IAccountService, AccountService>();
             services.AddTransient<IUserService, UserService>();
             services.AddScoped<IAuthenticatedUserService, AuthenticatedUserService>();
+            services.AddScoped<IJwtService, JwtService>();
 
             Console.WriteLine($"Info: {nameof(Identity)} layer initialized successfully.");
 

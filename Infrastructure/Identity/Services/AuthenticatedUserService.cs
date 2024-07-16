@@ -56,13 +56,17 @@ public class AuthenticatedUserService : IAuthenticatedUserService
         get
         {
             var permissionList = Enumerable.Empty<string>();
-            var permissionsClaim = _httpContextAccessor.HttpContext?.User.FindFirst("permissions")?.Value;
-            if (permissionsClaim != null)
+            var permissionsClaim = _httpContextAccessor.HttpContext?.User?.Claims
+                .FirstOrDefault(c => c.Type == "permissions")?.Value;
+
+            if (!string.IsNullOrEmpty(permissionsClaim))
             {
-                permissionList = JsonConvert.DeserializeObject<List<string>>(permissionsClaim) ?? [];
+                permissionList = JsonConvert.DeserializeObject<List<string>>(permissionsClaim) ?? Enumerable.Empty<string>();
             }
+
             return permissionList;
         }
     }
+
 
 }
