@@ -9,21 +9,19 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Contracts.Todo;
 using Shared.Wrappers;
-using Microsoft.AspNetCore.Authorization;
 
 namespace WebApi.Controllers
 {
-    [Authorize]
-    public class TodoController : BaseApiController
+    public class TodosController : BaseApiController
     {
         private readonly IMediator _mediator;
 
-        public TodoController(IMediator mediator)
+        public TodosController(IMediator mediator)
         {
             _mediator = mediator;
         }
 
-        [HttpPost("create")]
+        [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateTodoRequest request)
         {
             var command = request.Adapt<CreateTodoCommand>();
@@ -31,7 +29,7 @@ namespace WebApi.Controllers
             return Ok(response);
         }
 
-        [HttpDelete("delete")]
+        [HttpDelete]
         public async Task<IActionResult> Delete([FromQuery] DeleteTodoRequest request)
         {
             var command = request.Adapt<DeleteTodoCommand>();
@@ -39,7 +37,7 @@ namespace WebApi.Controllers
             return Ok(response);
         }
 
-        [HttpGet("all")]
+        [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] PaginationFilter request)
         {
             var query = request.Adapt<GetAllTodosQuery>();
@@ -54,10 +52,10 @@ namespace WebApi.Controllers
                 response.TotalRecords));
         }
 
-        [HttpGet("get-by-id")]
-        public async Task<IActionResult> GetById([FromQuery] GetTodoByIdRequest request)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
         {
-            var query = request.Adapt<GetTodoByIdQuery>();
+            var query = new GetTodoByIdQuery { Id = id };
             var response = await _mediator.Send(query);
 
             var todoResponse = response.Data.Adapt<TodoResponse>();
@@ -65,11 +63,11 @@ namespace WebApi.Controllers
             return Ok(Response<TodoResponse>.Success(todoResponse));
         }
 
-        [HttpPost("get-by-title")]
-        public async Task<IActionResult> GetByTitle([FromBody] GetTodoByTitleRequest request)
+        [HttpPost("{title}")]
+        public async Task<IActionResult> GetByTitle(string title)
         {
 
-            var query = request.Adapt<GetSingleTitleQuery>();
+            var query = new GetSingleTitleQuery { Title = title };
             var response = await _mediator.Send(query);
 
             var todoResponse = response.Data.Adapt<TodoResponse>();
@@ -77,20 +75,23 @@ namespace WebApi.Controllers
             return Ok(Response<TodoResponse>.Success(todoResponse));
         }
 
-        [HttpPut("update")]
-        public async Task<IActionResult> Update([FromBody] UpdateTodoRequest request)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateTodoRequest request)
         {
             var command = request.Adapt<UpdateTodoCommand>();
+            command.Id = id;
             var response = await _mediator.Send(command);
             return Ok(response);
         }
 
-        [HttpPut("update-status")]
-        public async Task<IActionResult> UpdateStatus([FromBody] UpdateTodoStatusRequest request)
+        [HttpPut("status/{id}")]
+        public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateTodoStatusRequest request)
         {
             var command = request.Adapt<UpdateTodoStatusCommand>();
+            command.Id = id;
             var response = await _mediator.Send(command);
             return Ok(response);
         }
+
     }
 }

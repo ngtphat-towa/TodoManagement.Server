@@ -1,6 +1,4 @@
-﻿using Application.Interfaces.Services;
-
-using Microsoft.OpenApi.Models;
+﻿using Microsoft.OpenApi.Models;
 
 namespace WebApi
 {

@@ -2,7 +2,7 @@
 using Application.Features.Users.DeleteUser;
 using Application.Features.Users.GetAllUsers;
 using Application.Features.Users.GetSingleUser;
-using Application.Features.Users.UpdateUser;
+using Application.Features.Users.UpdateUser.Info;
 
 using Contracts.User;
 
@@ -16,7 +16,7 @@ using Shared.Wrappers;
 
 namespace WebApi.Controllers;
 
-public class UsersController :BaseApiController
+public class UsersController : BaseApiController
 {
     private readonly IMediator _mediator;
 
@@ -24,7 +24,7 @@ public class UsersController :BaseApiController
     {
         _mediator = mediator;
     }
-
+    
     [HttpPost("create")]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request)
     {
@@ -33,42 +33,42 @@ public class UsersController :BaseApiController
         return Ok(result);
     }
 
-    [HttpPut("update")]
-    public async Task<IActionResult> UpdateUser([FromBody] UpdateUserRequest request)
+    [HttpPut("{userId}")]
+    public async Task<IActionResult> UpdateUser(string userId, [FromBody] UpdateUserInfoRequest request)
     {
-        var command = request.Adapt<UpdateUserCommand>();
+        var command = request.Adapt<UpdateUserInfoCommand>();
         var result = await _mediator.Send(command);
         return Ok(result);
     }
 
-    [HttpDelete("delete")]
-    public async Task<IActionResult> DeleteUser([FromBody] DeleteUserRequest request)
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteUser(string id)
     {
-        var command = request.Adapt<DeleteUserCommand>();
+        var command = new DeleteUserCommand { Id = id };
         var result = await _mediator.Send(command);
         return Ok(result);
     }
 
-    [HttpGet("get-by-id")]
-    public async Task<IActionResult> GetUserById([FromQuery] GetUserByIdRequest request)
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetUserById(string id)
     {
-        var query = request.Adapt<GetUserByIdQuery>();
+        var query = new GetUserByIdQuery { Id = id };
         var result = await _mediator.Send(query);
         var response = result.Data.Adapt<UserResponse>();
 
         return Ok(Response<UserResponse>.Success(response)); ;
     }
-    [HttpGet("get-by-email")]
-    public async Task<IActionResult> GetUserByEmail([FromQuery] GetUserByEmailRequest request)
+    [HttpGet("email/{email}")]
+    public async Task<IActionResult> GetUserByEmail(string email)
     {
-        var query = request.Adapt<GetUserByEmailQuery>();
+        var query = new GetUserByEmailQuery { Email = email };
         var result = await _mediator.Send(query);
         var response = result.Data.Adapt<UserResponse>();
 
         return Ok(Response<UserResponse>.Success(response));
     }
 
-    [HttpGet("all")]
+    [HttpGet]
     public async Task<IActionResult> GetAllUsers([FromQuery] PaginationFilter pagination)
     {
         var query = pagination.Adapt<GetAllUsersQuery>();

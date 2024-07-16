@@ -2,9 +2,8 @@
 
 using Contracts.Accounts;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
-using System.Threading.Tasks;
 
 namespace WebApi.Controllers
 {
@@ -30,6 +29,7 @@ namespace WebApi.Controllers
         /// <param name="request">Authentication request data.</param>
         /// <returns>ActionResult with authentication result.</returns>
         [HttpPost("authenticate")]
+        [AllowAnonymous]
         public async Task<IActionResult> AuthenticateAsync(AuthenticationRequest request)
         {
             return Ok(await _accountService.AuthenticateAsync(request, GenerateIPAddress()));
@@ -41,6 +41,7 @@ namespace WebApi.Controllers
         /// <param name="request">Registration request data.</param>
         /// <returns>ActionResult with registration result.</returns>
         [HttpPost("register")]
+        [AllowAnonymous]
         public async Task<IActionResult> RegisterAsync(RegisterRequest request)
         {
             var origin = Request.Headers.Origin;
@@ -54,6 +55,7 @@ namespace WebApi.Controllers
         /// <param name="code">Confirmation code.</param>
         /// <returns>ActionResult with email confirmation result.</returns>
         [HttpGet("confirm-email")]
+        [AllowAnonymous]
         public async Task<IActionResult> ConfirmEmailAsync([FromQuery] string userId, [FromQuery] string code)
         {
             var origin = Request.Headers.Origin;
@@ -66,6 +68,7 @@ namespace WebApi.Controllers
         /// <param name="model">Forgot password request data.</param>
         /// <returns>ActionResult indicating success.</returns>
         [HttpPost("forgot-password")]
+        [AllowAnonymous]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordRequest model)
         {
             await _accountService.ForgotPassword(model, Request.Headers.Origin!);
@@ -78,6 +81,7 @@ namespace WebApi.Controllers
         /// <param name="model">Reset password request data.</param>
         /// <returns>ActionResult with password reset result.</returns>
         [HttpPost("reset-password")]
+        [AllowAnonymous]
         public async Task<IActionResult> ResetPassword(ResetPasswordRequest model)
         {
             return Ok(await _accountService.ResetPassword(model));
