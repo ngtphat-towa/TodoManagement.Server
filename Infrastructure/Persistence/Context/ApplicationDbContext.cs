@@ -7,51 +7,56 @@ using Microsoft.EntityFrameworkCore;
 
 using Persistence.Context.EntityConfigurations;
 
-namespace Persistence.Context;
-
-public class ApplicationDbContext : DbContext
+namespace Persistence.Context
 {
-    private readonly IDateTimeService _dateTime;
-    private readonly IAuthenticatedUserService _authenticatedUser;
-
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IDateTimeService dateTime, IAuthenticatedUserService authenticatedUser) : base(options)
+    public class ApplicationDbContext : DbContext
     {
-        ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
-        _dateTime = dateTime;
-        _authenticatedUser = authenticatedUser;
-    }
-    public DbSet<Todo> Todos { get; set; }
+        private readonly IDateTimeService _dateTime;
+        private readonly IAuthenticatedUserService _authenticatedUser;
 
-    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
-    {
-        foreach (var entry in ChangeTracker.Entries<AuditableBaseEntity>())
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IDateTimeService dateTime, IAuthenticatedUserService authenticatedUser)
+            : base(options)
         {
-            switch (entry.State)
+            ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+            _dateTime = dateTime ?? throw new ArgumentNullException(nameof(dateTime));
+            _authenticatedUser = authenticatedUser ?? throw new ArgumentNullException(nameof(authenticatedUser));
+        }
+
+        public DbSet<Todo> Todos { get; set; }
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            foreach (var entry in ChangeTracker.Entries<AuditableBaseEntity>())
             {
-                case EntityState.Added:
-                    entry.Entity.Created = _dateTime.NowUtc;
-                    entry.Entity.CreatedBy = _authenticatedUser.UserId;
-                    break;
-                case EntityState.Modified:
-                    entry.Entity.LastModified = _dateTime.NowUtc;
-                    entry.Entity.LastModifiedBy = _authenticatedUser.UserId;
-                    break;
+                switch (entry.State)
+                {
+                    case EntityState.Added:
+                        entry.Entity.Created = _dateTime.UtcNow;
+                        entry.Entity.CreatedBy = _authenticatedUser?.UserId?? string.Empty;
+                        break;
+                    case EntityState.Modified:
+                        entry.Entity.LastModified = _dateTime.UtcNow;
+                        entry.Entity.LastModifiedBy = _authenticatedUser?.UserId ?? string.Empty;
+                        break;
+                }
             }
+            return base.SaveChangesAsync(cancellationToken);
         }
-        return base.SaveChangesAsync(cancellationToken);
-    }
-    protected override void OnModelCreating(ModelBuilder builder)
-    {
-        // Apply configurations
-        builder.ApplyConfiguration(new TodoEntityConfiguration());
 
-        //All Decimals will have 18,6 Range
-        foreach (var property in builder.Model.GetEntityTypes()
-        .SelectMany(t => t.GetProperties())
-        .Where(p => p.ClrType == typeof(decimal) || p.ClrType == typeof(decimal?)))
+        protected override void OnModelCreating(ModelBuilder builder)
         {
-            property.SetColumnType("decimal(18,2)");
+            // Apply configurations
+            builder.ApplyConfiguration(new TodoEntityConfiguration());
+
+            // Set decimal column type
+            foreach (var property in builder.Model.GetEntityTypes()
+                .SelectMany(t => t.GetProperties())
+                .Where(p => p.ClrType == typeof(decimal) || p.ClrType == typeof(decimal?)))
+            {
+                property.SetColumnType("decimal(18,2)");
+            }
+
+            base.OnModelCreating(builder);
         }
-        base.OnModelCreating(builder);
     }
 }
