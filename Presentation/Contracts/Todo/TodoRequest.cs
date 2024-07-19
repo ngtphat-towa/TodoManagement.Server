@@ -14,11 +14,14 @@ public record GetTodoByTitleRequest
 {
     public string Title { get; set; } = string.Empty;
 }
-public record UpdateTodoRequest : CreateTodoRequest
+public record UpdateTodoRequest 
 {
-}
-public record DeleteTodoRequest 
-{
+    public string Title { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    /// <summary>
+    /// Opening = 1, Progressing = 2, Testing = 3, Done = 4, Rejected = 5,
+    /// </summary>
+    public int Status { get; set; }
 }
 
 public record UpdateTodoStatusRequest

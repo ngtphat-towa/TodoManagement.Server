@@ -20,7 +20,7 @@ namespace Application.Features.Users.UpdateUser.Permission
                 .Must(PermissionsAreValid).WithMessage("One or more permissions are invalid.");
 
             RuleFor(x => x)
-                .Must(CanUpdateUserWithPermission)
+                .MustAsync(CanUpdateUserWithPermission)
                 .WithMessage("You do not have permission to update user permissions.");
         }
 
@@ -54,11 +54,11 @@ namespace Application.Features.Users.UpdateUser.Permission
             return true;
         }
 
-        private bool CanUpdateUserWithPermission(UpdateUserPermissionCommand command)
+        private async Task<bool> CanUpdateUserWithPermission(UpdateUserPermissionCommand command, CancellationToken cancellationToken)
         {
             // Get authenticated user's roles and permissions
-            var authenticatedRoles = _authenticatedUserService.Roles;
-            var authenticatedPermissions = _authenticatedUserService.Permissions;
+            var authenticatedRoles = await _authenticatedUserService.Roles();
+            var authenticatedPermissions = await _authenticatedUserService.Permissions();
 
             if (authenticatedRoles == null || !authenticatedRoles.Any())
             {

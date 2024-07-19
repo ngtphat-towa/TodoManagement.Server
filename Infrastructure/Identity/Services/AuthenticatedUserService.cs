@@ -2,19 +2,21 @@
 
 using Application.Interfaces.Services;
 
-using Microsoft.AspNetCore.Http;
+using Domain.Entities;
 
-using Newtonsoft.Json;
+using Microsoft.AspNetCore.Http;
 
 namespace Identity.Services;
 
 public class AuthenticatedUserService : IAuthenticatedUserService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IAccountService _accountService;
 
-    public AuthenticatedUserService(IHttpContextAccessor httpContextAccessor)
+    public AuthenticatedUserService(IHttpContextAccessor httpContextAccessor, IAccountService accountService)
     {
         _httpContextAccessor = httpContextAccessor;
+        _accountService = accountService;
     }
 
     public string UserId
@@ -33,14 +35,11 @@ public class AuthenticatedUserService : IAuthenticatedUserService
         }
     }
 
-    public IEnumerable<string> Roles
+    public async Task<IEnumerable<string>> Roles(string? userId)
     {
-        get
-        {
-            return _httpContextAccessor.HttpContext?.User?.Claims
-                .Where(c => c.Type == ClaimTypes.Role)
-                .Select(c => c.Value) ?? Enumerable.Empty<string>();
-        }
+        var result = await _accountService.GetUserRolesAsync(userId ?? this.UserId!);
+        return result.Data!;
+
     }
 
     public IEnumerable<Claim> Claims
@@ -51,21 +50,11 @@ public class AuthenticatedUserService : IAuthenticatedUserService
         }
     }
 
-    public IEnumerable<string> Permissions
+    public async Task<IEnumerable<string>> Permissions(string? userId)
     {
-        get
-        {
-            var permissionList = Enumerable.Empty<string>();
-            var permissionsClaim = _httpContextAccessor.HttpContext?.User?.Claims
-                .FirstOrDefault(c => c.Type == "permissions")?.Value;
+        var result = await _accountService.GetUserPermissionsAsync(userId ?? this.UserId!);
+        return result.Data!;
 
-            if (!string.IsNullOrEmpty(permissionsClaim))
-            {
-                permissionList = JsonConvert.DeserializeObject<List<string>>(permissionsClaim) ?? Enumerable.Empty<string>();
-            }
-
-            return permissionList;
-        }
     }
 
 

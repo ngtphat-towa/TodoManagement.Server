@@ -3,6 +3,7 @@ using Domain.Enums;
 using Application.Interfaces.Services;
 using System;
 using System.Linq;
+using System.Data;
 
 namespace Application.Features.Users.UpdateUser.Role
 {
@@ -18,10 +19,11 @@ namespace Application.Features.Users.UpdateUser.Role
                 .NotEmpty().WithMessage("User ID must be provided.");
 
             RuleFor(x => x.Role)
-                .Must(role => RoleIsValid(role))
-                .WithMessage("Invalid role specified.")
-                .Must(role => CanUpdateUserRoleWithPermission(role))
-                .WithMessage("You do not have permission to update user role.");
+            .Must(role => RoleIsValid(role))
+            .WithMessage("Invalid role specified.")
+            .MustAsync(CanUpdateUserRoleWithPermission)
+            .WithMessage("You do not have permission to update user role.");
+
         }
 
         private bool RoleIsValid(short roleToUpdate)
@@ -29,10 +31,10 @@ namespace Application.Features.Users.UpdateUser.Role
             return Enum.IsDefined(typeof(Roles), roleToUpdate);
         }
 
-        private bool CanUpdateUserRoleWithPermission(short role)
+        private async Task<bool> CanUpdateUserRoleWithPermission(short role, CancellationToken cancellationToken)
         {
             // Get authenticated user's roles
-            var currentUserRoles = _authenticatedUserService.Roles;
+            var currentUserRoles = await _authenticatedUserService.Roles();
 
             if (currentUserRoles == null || !currentUserRoles.Any())
             {
@@ -75,4 +77,3 @@ namespace Application.Features.Users.UpdateUser.Role
         }
     }
 }
-    

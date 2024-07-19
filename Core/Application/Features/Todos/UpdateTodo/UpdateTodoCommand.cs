@@ -1,5 +1,4 @@
 ﻿using Application.Exceptions;
-using Application.Features.Todos.CreateTodo;
 using Application.Interfaces.Repositories;
 
 using MediatR;
@@ -8,9 +7,15 @@ using Shared.Wrappers;
 
 namespace Application.Features.Todos.UpdateTodo;
 
-public record UpdateTodoCommand : CreateTodoCommand
+public record UpdateTodoCommand : IRequest<Response<int>>
 {
     public int Id { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    /// <summary>
+    /// Opening = 1, Progressing = 2, Testing = 3, Done = 4, Rejected = 5,
+    /// </summary>
+    public short Status { get; set; }
 }
 public class UpdateTodoCommandHandler : IRequestHandler<UpdateTodoCommand, Response<int>>
 {
@@ -35,6 +40,6 @@ public class UpdateTodoCommandHandler : IRequestHandler<UpdateTodoCommand, Respo
 
         await _todoRepository.UpdateAsync(exitingTodo);
 
-        return Response<int>.Success(exitingTodo.Id);
+        return Response<int>.Success(exitingTodo.Id, $"Update {exitingTodo.Id} sucessfully");
     }
 }
