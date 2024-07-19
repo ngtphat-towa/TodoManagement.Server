@@ -21,25 +21,25 @@ namespace Application.Features.Users.CreateUser
             RuleFor(x => x.Role)
                 .Must(IsEnumDefined)
                 .WithMessage("Invalid role specified.")
-                .Must(CanCreateUserWithRole)
+                .MustAsync(CanCreateUserWithRole)
                 .WithMessage("You do not have permission to create a user with this role.");
         }
 
         private bool IsEnumDefined(short roleNumber)
         {
-            return Enum.IsDefined(typeof(Roles), roleNumber);
+            return Enum.IsDefined(typeof(Roles), (int)roleNumber);
         }
 
-        private bool CanCreateUserWithRole(short roles)
+        private async Task<bool> CanCreateUserWithRole(short roles, CancellationToken cancellationToken)
         {
-            var currentUserRoles = _authenticatedUserService.Roles;
+            var currentUserRoles = await _authenticatedUserService.Roles();
 
             if (currentUserRoles == null || !currentUserRoles.Any())
             {
                 return false;
             }
 
-            if (!Enum.IsDefined(typeof(Roles), roles))
+            if (!Enum.IsDefined(typeof(Roles),(int) roles))
             {
                 return false;
 

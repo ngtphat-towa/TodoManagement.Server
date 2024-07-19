@@ -7,12 +7,12 @@ using Shared.Wrappers;
 
 namespace Application.Features.Todos.UpdateTodoStatus;
 
-public record UpdateTodoStatusCommand : IRequest<Response<int>>
+public record UpdateTodoStatusCommand : IRequest<Response<Unit>>
 {
     public int Id { get; set; }
     public short Status { get; set; }
 }
-public class UpdateTodoStatusCommandHandler : IRequestHandler<UpdateTodoStatusCommand, Response<int>>
+public class UpdateTodoStatusCommandHandler : IRequestHandler<UpdateTodoStatusCommand, Response<Unit>>
 {
     private readonly ITodoRepository _todoRepository;
 
@@ -21,7 +21,7 @@ public class UpdateTodoStatusCommandHandler : IRequestHandler<UpdateTodoStatusCo
         _todoRepository = todoRepository;
     }
 
-    public async Task<Response<int>> Handle(UpdateTodoStatusCommand request, CancellationToken cancellationToken)
+    public async Task<Response<Unit>> Handle(UpdateTodoStatusCommand request, CancellationToken cancellationToken)
     {
         var exitingTodo = await _todoRepository.GetByIdAsync(request.Id);
         if (exitingTodo is null)
@@ -33,6 +33,6 @@ public class UpdateTodoStatusCommandHandler : IRequestHandler<UpdateTodoStatusCo
 
         await _todoRepository.UpdateAsync(exitingTodo);
 
-        return Response<int>.Success(exitingTodo.Id);
+        return Response<Unit>.MessageResponse($"Update {exitingTodo.Id} successfully", true);
     }
 }

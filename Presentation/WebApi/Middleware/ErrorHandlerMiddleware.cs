@@ -5,7 +5,7 @@ using Shared.Wrappers;
 using System.Net;
 using System.Text.Json;
 
-namespace WebApi.Middlewares
+namespace WebApi.Middleware
 {
     public class ErrorHandlerMiddleware
     {
