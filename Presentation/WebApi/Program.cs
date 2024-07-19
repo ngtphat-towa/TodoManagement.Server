@@ -4,16 +4,16 @@ using Shared;
 using Identity;
 
 using WebApi;
-using WebApi.Middlewares;
+using WebApi.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
 #region Layer
-builder.Services.AddPresentation();
-builder.Services.AddApplication();
-builder.Services.AddPersistence(builder.Configuration);
-builder.Services.AddIdentityServices(builder.Configuration);
 builder.Services.AddShared();
+builder.Services.AddIdentityServices(builder.Configuration);
+builder.Services.AddPersistence(builder.Configuration);
+builder.Services.AddApplication();
+builder.Services.AddPresentation();
 #endregion
 
 var app = builder.Build();
@@ -23,6 +23,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseCors("AllowOrigin");
 }
 app.UseMiddleware<ErrorHandlerMiddleware>();
 app.UseHttpsRedirection();

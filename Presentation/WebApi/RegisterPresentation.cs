@@ -38,7 +38,14 @@ namespace WebApi
                     });
                 });
 
-                services.AddHttpContextAccessor();       
+                services.AddHttpContextAccessor();
+                services.AddCors(options =>
+                {
+                    options.AddPolicy("AllowOrigin",
+                        builder => builder.WithOrigins("http://localhost:4200")
+                                          .AllowAnyMethod()
+                                          .AllowAnyHeader());
+                });
                 Console.WriteLine($"Info: {nameof(WebApi)} layer initialized successfully.");
             }
             catch (Exception ex)
