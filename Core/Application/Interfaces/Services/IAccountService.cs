@@ -11,4 +11,7 @@ public interface IAccountService
     Task<Response<string>> ConfirmEmailAsync(string userId, string code);
     Task ForgotPassword(ForgotPasswordRequest model, string origin);
     Task<Response<string>> ResetPassword(ResetPasswordRequest model);
+    Task<Response<string>> LogoutAsync(string userId);
+    Task<Response<List<string>>> GetUserRolesAsync(string userId);
+    Task<Response<List<string>>> GetUserPermissionsAsync(string userId);
 }

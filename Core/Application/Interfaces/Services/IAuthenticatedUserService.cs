@@ -6,7 +6,7 @@ public interface IAuthenticatedUserService
 {
     string UserId { get; } 
     string Username { get; }
-    IEnumerable<string> Permissions { get; }
-    IEnumerable<string> Roles { get; } 
+    Task<IEnumerable<string>> Permissions(string? userId = null);
+    Task<IEnumerable<string>> Roles(string? userId = null);
     IEnumerable<Claim> Claims { get; }
 }

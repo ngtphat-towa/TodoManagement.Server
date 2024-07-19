@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
@@ -38,7 +39,7 @@ namespace Identity
             services.AddTransient<IAccountService, AccountService>();
             services.AddTransient<IUserService, UserService>();
             services.AddScoped<IAuthenticatedUserService, AuthenticatedUserService>();
-            services.AddScoped<IJwtService, JwtService>();
+            services.AddScoped<ITokenService, TokenService>();
 
             Console.WriteLine($"Info: {nameof(Identity)} layer initialized successfully.");
 
@@ -77,47 +78,54 @@ namespace Identity
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-            .AddJwtBearer(o =>
-            {
-                o.RequireHttpsMetadata = false;
-                o.SaveToken = false;
-                o.TokenValidationParameters = new TokenValidationParameters
+                .AddJwtBearer(o =>
                 {
-                    ValidateIssuerSigningKey = true,
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero,
-                    ValidIssuer = configuration["JWTSettings:Issuer"],
-                    ValidAudience = configuration["JWTSettings:Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWTSettings:Key"]!))
-                };
-                o.Events = new JwtBearerEvents
-                {
-                    OnAuthenticationFailed = c =>
+                    o.RequireHttpsMetadata = false;
+                    o.SaveToken = false;
+                    var jwtSettings = configuration.GetSection("JWTSettings").Get<JwtSettings>();
+                    o.TokenValidationParameters = new TokenValidationParameters
                     {
-                        c.NoResult();
-                        c.Response.StatusCode = 500;
-                        c.Response.ContentType = "text/plain";
-                        return c.Response.WriteAsync(c.Exception.ToString());
-                    },
-                    OnChallenge = context =>
+                        ValidateIssuerSigningKey = true,
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidIssuer = jwtSettings?.Issuer,
+                        ValidAudience = jwtSettings?.Audience,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings?.Key!)),
+                        ClockSkew = TimeSpan.Zero,
+                        RequireExpirationTime = true
+                    };
+                    o.Events = new JwtBearerEvents
                     {
-                        context.HandleResponse();
-                        context.Response.StatusCode = 401;
-                        context.Response.ContentType = "application/json";
-                        var result = JsonConvert.SerializeObject(Response<bool>.Failure("You are not Authorized"));
-                        return context.Response.WriteAsync(result);
-                    },
-                    OnForbidden = context =>
-                    {
-                        context.Response.StatusCode = 403;
-                        context.Response.ContentType = "application/json";
-                        var result = JsonConvert.SerializeObject(Response<bool>.Failure("You are not authorized to access this resource"));
-                        return context.Response.WriteAsync(result);
-                    },
-                };
-            });
+                        OnAuthenticationFailed = c =>
+                        {
+                            if (c.Exception.GetType() == typeof(SecurityTokenExpiredException))
+                            {
+                                c.Response.Headers.Append("Token-Expired", "true");
+                            }
+                            c.NoResult();
+                            c.Response.StatusCode = 500;
+                            c.Response.ContentType = "text/plain";
+                            return c.Response.WriteAsync(c.Exception.ToString());
+                        },
+                        OnChallenge = context =>
+                        {
+                            context.HandleResponse();
+                            context.Response.StatusCode = 401;
+                            context.Response.ContentType = "application/json";
+                            var result = JsonConvert.SerializeObject(Response<bool>.Failure("You are not Authorized"));
+                            return context.Response.WriteAsync(result);
+                        },
+                        OnForbidden = context =>
+                        {
+                            context.Response.StatusCode = 403;
+                            context.Response.ContentType = "application/json";
+                            var result = JsonConvert.SerializeObject(Response<bool>.Failure("You are not authorized to access this resource"));
+                            return context.Response.WriteAsync(result);
+                        },
+
+                    };
+                });
         }
         private static void SeedIdentityData(IServiceCollection services)
         {

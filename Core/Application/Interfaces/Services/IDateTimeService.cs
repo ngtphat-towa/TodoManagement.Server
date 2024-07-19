@@ -2,5 +2,5 @@
 
 public interface IDateTimeService
 {
-    DateTime NowUtc { get; }
+    DateTime UtcNow { get; }
 }
