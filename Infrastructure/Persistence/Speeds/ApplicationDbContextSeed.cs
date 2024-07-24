@@ -7,12 +7,12 @@ namespace Persistence.Seeding
 {
     public static class ApplicationDbContextSeed
     {
-        public static void Seed(ApplicationDbContext dbContext)
+        public static async Task Seed(ApplicationDbContext dbContext)
         {
             if (!dbContext.Todos.Any())
             {
-                dbContext.Todos.AddRange(Todos);
-                dbContext.SaveChanges();
+                await dbContext.Todos.AddRangeAsync(Todos);
+                await dbContext.SaveChangesAsync();
             }
         }
         public static readonly List<Todo> Todos = new List<Todo>

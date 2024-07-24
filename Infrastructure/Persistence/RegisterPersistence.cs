@@ -4,27 +4,23 @@ using Application.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 using Persistence.Context;
 using Persistence.Repositories;
 using Persistence.Seeding;
 
-using System;
-
 namespace Persistence
 {
     public static class RegisterPersistence
     {
-        public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration, ILogger logger)
         {
-            var isMemoryData = configuration.GetValue<bool>("UseInMemoryDatabase");
-
             try
             {
-                if (isMemoryData)
+                if (configuration.GetValue<bool>("UseInMemoryDatabase"))
                 {
                     AddInMemoryDatabase(services);
-                    SeedInMemoryDatabase(services);
                 }
                 else
                 {
@@ -32,13 +28,13 @@ namespace Persistence
                 }
                 RegisterRepositories(services);
 
-                Console.WriteLine($"Info: Memory data initialized successfully.");
-                Console.WriteLine($"Info: {nameof(Persistence)} layer initialized successfully.");
+                logger.LogInformation($"Memory data initialized successfully.");
+                logger.LogInformation($"{nameof(Persistence)} layer initialized successfully.");
 
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error initializing {nameof(Persistence)} layer: {ex.Message}");
+                logger.LogError($"Error initializing {nameof(Persistence)} layer: {ex.Message}", ex);
             }
 
             return services;
@@ -50,12 +46,17 @@ namespace Persistence
                 options.UseInMemoryDatabase("ApplicationDb"));
         }
 
-        private static void SeedInMemoryDatabase(IServiceCollection services)
+        public static async Task SeedPersistenceData(IServiceCollection services, IConfiguration configuration, ILogger logger)
         {
-            using (var serviceProvider = services.BuildServiceProvider())
+            var isMemoryData = configuration.GetValue<bool>("UseInMemoryDatabase");
+            if (isMemoryData)
             {
-                var dbContext = serviceProvider.GetRequiredService<ApplicationDbContext>();
-                ApplicationDbContextSeed.Seed(dbContext);
+                using (var serviceProvider = services.BuildServiceProvider())
+                {
+                    var dbContext = serviceProvider.GetRequiredService<ApplicationDbContext>();
+                   await  ApplicationDbContextSeed.Seed(dbContext);
+                }
+                logger.LogInformation($"Seeding {nameof(Persistence)} data successfully.");
             }
         }
 
@@ -69,7 +70,6 @@ namespace Persistence
         {
             services.AddScoped(typeof(IGenericRepositoryAsync<>), typeof(GenericRepository<>));
             services.AddTransient<ITodoRepository, TodoRepository>();
-
 
         }
     }

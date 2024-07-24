@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 using Newtonsoft.Json;
@@ -29,27 +30,27 @@ namespace Identity
 {
     public static class RegisterIdentity
     {
-        public static IServiceCollection AddIdentityServices(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddIdentityServices(this IServiceCollection services, IConfiguration configuration, ILogger logger)
         {
-            ConfigureDatabase(services, configuration);
+            ConfigureDatabase(services, configuration, logger);
             ConfigureIdentity(services);
             ConfigureAuthentication(services, configuration);
-            SeedIdentityData(services);
 
             services.AddTransient<IAccountService, AccountService>();
             services.AddTransient<IUserService, UserService>();
             services.AddScoped<IAuthenticatedUserService, AuthenticatedUserService>();
             services.AddScoped<ITokenService, TokenService>();
 
-            Console.WriteLine($"Info: {nameof(Identity)} layer initialized successfully.");
+            logger.LogInformation($"{nameof(Identity)} layer initialized successfully.");
 
             return services;
         }
 
-        private static void ConfigureDatabase(IServiceCollection services, IConfiguration configuration)
+        private static void ConfigureDatabase(IServiceCollection services, IConfiguration configuration, ILogger logger)
         {
             var isMemoryData = configuration.GetValue<bool>("UseInMemoryDatabase");
-            Console.WriteLine($"Data-Info: UseInMemoryDatabase = {isMemoryData} .");
+
+            logger.LogDebug($"UseInMemoryDatabase = {isMemoryData} .");
             if (isMemoryData)
             {
                 services.AddDbContext<IdentityContext>(options =>
@@ -127,17 +128,23 @@ namespace Identity
                     };
                 });
         }
-        private static void SeedIdentityData(IServiceCollection services)
+        public static async Task SeedIdentityData(IServiceCollection services, IConfiguration configuration, ILogger logger)
         {
-            // Retrieve the necessary services
-            using (var serviceProvider = services.BuildServiceProvider())
+            var isMemoryData = configuration.GetValue<bool>("UseInMemoryDatabase");
+            if (isMemoryData)
             {
-                var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-                var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+                // Retrieve the necessary services
+                using (var serviceProvider = services.BuildServiceProvider())
+                {
+                    var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+                    var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-                // Ensure roles and users are seeded
-                DefaultRoles.SeedAsync(userManager, roleManager).Wait();
+                    // Ensure roles and users are seeded
+                    await DefaultRoles.SeedAsync(userManager, roleManager);
+                }
+                logger.LogInformation($"Info: Seeding {nameof(Identity)} data successfully.");
             }
+
         }
     }
 }
