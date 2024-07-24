@@ -1,6 +1,7 @@
 ﻿using Application.Interfaces.Services;
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 using Shared.Services;
 
@@ -8,18 +9,18 @@ namespace Shared;
 
 public static class RegisterShared
 {
-    public static IServiceCollection AddShared(this IServiceCollection services)
+    public static IServiceCollection AddShared(this IServiceCollection services, ILogger logger)
     {
         try
         {
             services.AddScoped<IDateTimeService, DateTimeService>();
             services.AddScoped<IEmailService, EmailService>();
 
-            Console.WriteLine($"Info: {nameof(Shared)} layer initialized successfully.");
+            logger.LogInformation($"{nameof(Shared)} layer initialized successfully.");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error initializing  {nameof(Shared)} layer: {ex.Message}");
+            logger.LogError($"Error initializing  {nameof(Shared)} layer: {ex.Message}",ex);
         }
         return services;
     }

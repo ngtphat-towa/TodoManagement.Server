@@ -8,12 +8,13 @@ using FluentValidation;
 using MediatR;
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Application
 {
     public static class RegisterApplication
     {
-        public static IServiceCollection AddApplication(this IServiceCollection services)
+        public static IServiceCollection AddApplication(this IServiceCollection services, ILogger logger)
         {
             try
             {
@@ -28,11 +29,11 @@ namespace Application
                 services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(RegisterApplication).Assembly));
 
 
-                Console.WriteLine($"Info: {nameof(Application)} layer initialized successfully.");
+                logger.LogInformation($"{nameof(Application)} layer initialized successfully.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error initializing {nameof(Application)} layer: {ex.Message}");
+                logger.LogError($"Error initializing {nameof(Application)} layer: {ex.Message}", ex);
             }
 
 

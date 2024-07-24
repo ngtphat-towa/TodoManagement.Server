@@ -4,7 +4,7 @@ namespace WebApi
 {
     public static class RegisterPresentation
     {
-        public static IServiceCollection AddPresentation(this IServiceCollection services)
+        public static IServiceCollection AddPresentation(this IServiceCollection services, ILogger logger)
         {
             try
             {
@@ -46,11 +46,11 @@ namespace WebApi
                                           .AllowAnyMethod()
                                           .AllowAnyHeader());
                 });
-                Console.WriteLine($"Info: {nameof(WebApi)} layer initialized successfully.");
+                logger.LogInformation($"{nameof(WebApi)} layer initialized successfully.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error initializing {nameof(WebApi)} layer: {ex.Message}");
+                logger.LogError($"Error initializing {nameof(WebApi)} layer: {ex.Message}");
             }
 
             return services;
