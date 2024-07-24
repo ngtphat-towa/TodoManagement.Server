@@ -1,9 +1,8 @@
-﻿using FluentValidation;
+﻿using Application.Interfaces.Services;
+
 using Domain.Enums;
-using Application.Interfaces.Services;
-using System;
-using System.Linq;
-using System.Data;
+
+using FluentValidation;
 
 namespace Application.Features.Users.UpdateUser.Role
 {

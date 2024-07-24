@@ -1,5 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Text;
+﻿using System.Text;
 
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
@@ -40,6 +39,7 @@ namespace Identity
             services.AddTransient<IUserService, UserService>();
             services.AddScoped<IAuthenticatedUserService, AuthenticatedUserService>();
             services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 
             logger.LogInformation($"{nameof(Identity)} layer initialized successfully.");
 

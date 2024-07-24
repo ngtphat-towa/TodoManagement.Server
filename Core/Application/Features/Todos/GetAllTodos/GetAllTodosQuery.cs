@@ -1,10 +1,11 @@
 ﻿using Application.Interfaces.Repositories;
 
-using Domain.Entity;
+using Domain.Entities;
 
 using MapsterMapper;
 
 using MediatR;
+
 using Shared.Wrappers;
 
 namespace Application.Features.Todos.GetAllTodos;

@@ -1,12 +1,12 @@
 ﻿using Application.Interfaces.Repositories;
 
+using Domain.Entities;
+
 using MapsterMapper;
 
 using MediatR;
 
 using Shared.Wrappers;
-
-using Domain.Entity;
 
 namespace Application.Features.Todos.CreateTodo;
 
@@ -17,7 +17,7 @@ public record CreateTodoCommand : IRequest<Response<int>>
     /// <summary>
     /// Opening = 1, Progressing = 2, Testing = 3, Done = 4, Rejected = 5,
     /// </summary>
-    public short Status { get; set; } 
+    public short Status { get; set; }
 }
 public class CreateTodoCommandHandler : IRequestHandler<CreateTodoCommand, Response<int>>
 {

@@ -1,9 +1,9 @@
-﻿using Application.Exceptions;
+﻿using System.Net;
+using System.Text.Json;
+
+using Application.Exceptions;
 
 using Shared.Wrappers;
-
-using System.Net;
-using System.Text.Json;
 
 namespace WebApi.Middleware
 {
@@ -28,7 +28,7 @@ namespace WebApi.Middleware
             {
                 var response = context.Response;
                 response.ContentType = "application/json";
-                var responseModel = new Response<string>() { Succeeded = false, Message = error?.Message?? string.Empty };
+                var responseModel = new Response<string>() { Succeeded = false, Message = error?.Message ?? string.Empty };
 
                 switch (error)
                 {

@@ -1,6 +1,6 @@
 ﻿using Domain.Common;
 
-namespace Domain.Entity;
+namespace Domain.Entities;
 
 public class Todo : AuditableBaseEntity
 {

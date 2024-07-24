@@ -1,6 +1,8 @@
-﻿using FluentValidation;
+﻿using Application.Interfaces.Services;
+
 using Domain.Enums;
-using Application.Interfaces.Services;
+
+using FluentValidation;
 
 namespace Application.Features.Users.CreateUser
 {
@@ -39,7 +41,7 @@ namespace Application.Features.Users.CreateUser
                 return false;
             }
 
-            if (!Enum.IsDefined(typeof(Roles),(int) roles))
+            if (!Enum.IsDefined(typeof(Roles), (int)roles))
             {
                 return false;
 

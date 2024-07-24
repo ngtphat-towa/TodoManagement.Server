@@ -46,7 +46,7 @@ namespace Identity.Seeds
                 {
                     UserName = email,
                     Email = email,
-                    EmailConfirmed = true 
+                    EmailConfirmed = true
                 };
 
                 var result = await userManager.CreateAsync(newUser, password);
@@ -68,6 +68,6 @@ namespace Identity.Seeds
             }
         }
 
-       
+
     }
 }

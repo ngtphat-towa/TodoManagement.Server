@@ -1,4 +1,6 @@
-﻿using Application.Exceptions;
+﻿using System.Text;
+
+using Application.Exceptions;
 using Application.Interfaces.Services;
 
 using Contracts.Accounts;
@@ -15,8 +17,6 @@ using Microsoft.AspNetCore.WebUtilities;
 
 using Shared.Wrappers;
 
-using System.Text;
-
 namespace Identity.Services
 {
     public class AccountService : IAccountService
@@ -25,22 +25,31 @@ namespace Identity.Services
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailService _emailService;
-        private readonly IDateTimeService _dateTimeService;
         private readonly ITokenService _tokenService;
+        private readonly IRefreshTokenService _refreshTokenService;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AccountService"/> class.
+        /// </summary>
+        /// <param name="userManager">User manager for managing user accounts.</param>
+        /// <param name="roleManager">Role manager for managing roles.</param>
+        /// <param name="signInManager">Sign-in manager for handling user sign-ins.</param>
+        /// <param name="emailService">Service for sending emails.</param>
+        /// <param name="tokenService">Service for generating tokens.</param>
+        /// <param name="refreshTokenService">Service for managing refresh tokens.</param>
         public AccountService(UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
             SignInManager<ApplicationUser> signInManager,
             IEmailService emailService,
-            IDateTimeService dateTimeService,
-            ITokenService tokenService)
+            ITokenService tokenService,
+            IRefreshTokenService refreshTokenService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _signInManager = signInManager;
             _emailService = emailService;
-            _dateTimeService = dateTimeService;
             _tokenService = tokenService;
+            _refreshTokenService = refreshTokenService;
         }
 
         /// <summary>
@@ -78,7 +87,7 @@ namespace Identity.Services
             var token = await _tokenService.GenerateToken(user);
 
             // Generate a refresh token for the authenticated user
-            var refreshToken = await _tokenService.GenerateRefreshToken(user);
+            var refreshToken = await _refreshTokenService.GenerateRefreshToken(user);
 
             // Prepare an AuthenticationResponse object with user details and tokens
             var response = new AuthenticationResponse
@@ -258,7 +267,7 @@ namespace Identity.Services
             }
 
             // Invalidate the refresh token for the user
-            await _tokenService.InvalidateRefreshTokenAsync(user);
+            await _refreshTokenService.InvalidateRefreshTokenAsync(user);
 
             // Sign out the user from the authentication manager
             await _signInManager.SignOutAsync();

@@ -3,15 +3,17 @@ using Application.Features.Users.DeleteUser;
 using Application.Features.Users.GetAllUsers;
 using Application.Features.Users.GetSingleUser;
 using Application.Features.Users.UpdateUser.Info;
-using Mapster;
-using MediatR;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+
 using Contracts.User;
-using Shared.Wrappers;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+
+using Mapster;
+
+using MediatR;
+
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+using Shared.Wrappers;
 
 namespace WebApi.Controllers
 {

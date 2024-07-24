@@ -54,7 +54,7 @@ namespace Persistence
                 using (var serviceProvider = services.BuildServiceProvider())
                 {
                     var dbContext = serviceProvider.GetRequiredService<ApplicationDbContext>();
-                   await  ApplicationDbContextSeed.Seed(dbContext);
+                    await ApplicationDbContextSeed.Seed(dbContext);
                 }
                 logger.LogInformation($"Seeding {nameof(Persistence)} data successfully.");
             }

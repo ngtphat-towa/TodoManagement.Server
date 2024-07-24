@@ -2,8 +2,6 @@
 
 using Application.Interfaces.Services;
 
-using Domain.Entities;
-
 using Microsoft.AspNetCore.Http;
 
 namespace Identity.Services;

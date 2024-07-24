@@ -1,38 +1,26 @@
-﻿using System.Collections.Concurrent;
-using System.Security.Cryptography;
-
-using Identity.Models;
-
-namespace Identity.Services;
-
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
 using Application.Exceptions;
 using Application.Interfaces.Services;
 
-using Contracts.Accounts;
-
 using Domain.Settings;
 
 using Identity.Context;
 using Identity.Helpers;
+using Identity.Models;
 
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-
 using Microsoft.IdentityModel.Tokens;
 
+
+namespace Identity.Services;
 public interface ITokenService
 {
     Task<string> GenerateToken(ApplicationUser user, List<Claim>? optionalClaims = null);
     ClaimsPrincipal? ValidateToken(string token);
-    Task<string> GenerateRefreshToken(ApplicationUser user);
-    Task InvalidateRefreshTokenAsync(ApplicationUser user);
-    bool ValidateRefreshToken(ApplicationUser user, string refreshToken);
-    bool IsTokenExpired(string token);
 }
 
 /// <summary>
@@ -154,118 +142,5 @@ public class TokenService : ITokenService
             // Throw ApiException if token validation fails
             throw new ApiException($"Token validation failed: {ex.Message}");
         }
-    }
-
-    /// <summary>
-    /// Generates a refresh token for the specified user and stores it in the database.
-    /// </summary>
-    /// <param name="user">The user for whom the refresh token is generated.</param>
-    /// <returns>The generated refresh token as a string.</returns>
-    public async Task<string> GenerateRefreshToken(ApplicationUser user)
-    {
-        // Generate a new refresh token
-        var refreshToken = new RefreshToken
-        {
-            UserId = user.Id,
-            Token = GenerateRandomToken(),
-            Expires = _dateTimeService.UtcNow.AddDays(7), // Token expiration set to 7 days
-            Created = _dateTimeService.UtcNow,
-            CreatedByIp = IpHelper.GetIpAddress()
-        };
-
-        // Add refresh token to database
-        _dbContext.RefreshTokens.Add(refreshToken);
-        await _dbContext.SaveChangesAsync();
-
-        // Return the generated refresh token
-        return refreshToken.Token;
-    }
-
-    /// <summary>
-    /// Invalidates all refresh tokens associated with the specified user.
-    /// </summary>
-    /// <param name="user">The user for whom to invalidate refresh tokens.</param>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    public async Task InvalidateRefreshTokenAsync(ApplicationUser user)
-    {
-        // Retrieve all refresh tokens for the user from database
-        var refreshTokens = await _dbContext.RefreshTokens.Where(rt => rt.UserId == user.Id).ToListAsync();
-
-        // Update each refresh token with revocation details
-        foreach (var refreshToken in refreshTokens)
-        {
-            refreshToken.Revoked = _dateTimeService.UtcNow;
-            refreshToken.RevokedByIp = IpHelper.GetIpAddress();
-        }
-
-        // Save changes to database
-        await _dbContext.SaveChangesAsync();
-    }
-
-    /// <summary>
-    /// Checks if the specified JWT token is expired.
-    /// </summary>
-    /// <param name="token">The JWT token to check.</param>
-    /// <returns>True if the token is expired; otherwise, false.</returns>
-    public bool IsTokenExpired(string token)
-    {
-        // Create JWT token handler and retrieve key from settings
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.ASCII.GetBytes(_jwtSettings.Key);
-
-        try
-        {
-            // Configure token validation parameters (no validation for issuer, audience)
-            var validationParameters = new TokenValidationParameters
-            {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(key),
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidIssuer = _jwtSettings.Issuer,
-                ValidAudience = _jwtSettings.Audience,
-                ClockSkew = TimeSpan.Zero // No clock skew tolerance
-            };
-
-            // Validate the token and retrieve validated token
-            tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
-            var jwtSecurityToken = validatedToken as JwtSecurityToken;
-
-            // Check if token is expired based on ValidTo property
-            return jwtSecurityToken?.ValidTo < _dateTimeService.UtcNow;
-        }
-        catch (Exception)
-        {
-            // If validation fails, consider the token expired
-            return true;
-        }
-    }
-
-    /// <summary>
-    /// Validates if the specified refresh token is valid for the given user.
-    /// </summary>
-    /// <param name="user">The user for whom to validate the refresh token.</param>
-    /// <param name="refreshToken">The refresh token to validate.</param>
-    /// <returns>True if the refresh token is valid for the user; otherwise, false.</returns>
-    public bool ValidateRefreshToken(ApplicationUser user, string refreshToken)
-    {
-        // Retrieve the refresh token from database for the specified user
-        var storedToken = _dbContext.RefreshTokens.SingleOrDefault(rt => rt.UserId == user.Id && rt.Token == refreshToken);
-
-        // Check if the stored token exists and is active
-        return storedToken != null && storedToken.IsActive;
-    }
-
-    /// <summary>
-    /// Generates a random token for use as a refresh token.
-    /// </summary>
-    /// <returns>The generated random token as a string.</returns>
-    private static string GenerateRandomToken()
-    {
-        // Generate a random token using RNGCryptoServiceProvider
-        using var randomNumberGenerator = RandomNumberGenerator.Create();
-        var randomBytes = new byte[40];
-        randomNumberGenerator.GetBytes(randomBytes);
-        return BitConverter.ToString(randomBytes).Replace("-", "");
     }
 }

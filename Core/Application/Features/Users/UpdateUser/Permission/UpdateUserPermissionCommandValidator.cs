@@ -1,6 +1,8 @@
-﻿using FluentValidation;
+﻿using Application.Interfaces.Services;
+
 using Domain.Enums;
-using Application.Interfaces.Services;
+
+using FluentValidation;
 
 namespace Application.Features.Users.UpdateUser.Permission
 {

@@ -1,6 +1,6 @@
 ﻿using Application.Interfaces.Repositories;
 
-using Domain.Entity;
+using Domain.Entities;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -14,7 +14,7 @@ public class TodoRepository : GenericRepository<Todo>, ITodoRepository
 
     public TodoRepository(ApplicationDbContext dbContext) : base(dbContext)
     {
-        _todos = dbContext.Set<Todo  >();
+        _todos = dbContext.Set<Todo>();
     }
 
     public async Task<Todo?> GetByTitleAsync(string title)

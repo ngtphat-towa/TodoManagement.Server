@@ -1,5 +1,6 @@
 using Application.Interfaces.Common;
-using Domain.Entity;
+
+using Domain.Entities;
 
 namespace Application.Interfaces.Repositories;
 
