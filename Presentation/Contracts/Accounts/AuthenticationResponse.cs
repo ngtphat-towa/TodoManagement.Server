@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Contracts.Accounts;
+﻿namespace Contracts.Accounts;
 
 public class AuthenticationResponse
 {
@@ -10,6 +8,5 @@ public class AuthenticationResponse
     public List<string> Roles { get; set; } = default!;
     public bool IsVerified { get; set; }
     public string JWToken { get; set; } = string.Empty;
-    [JsonIgnore]
     public string RefreshToken { get; set; } = string.Empty;
 }
