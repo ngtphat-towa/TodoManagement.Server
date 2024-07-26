@@ -1,7 +1,7 @@
 ﻿using Application.Exceptions;
 using Application.Interfaces.Repositories;
 
-using Domain.Entity;
+using Domain.Entities;
 
 using MediatR;
 

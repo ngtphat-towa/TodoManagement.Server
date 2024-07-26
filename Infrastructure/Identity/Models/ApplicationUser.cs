@@ -9,6 +9,6 @@ namespace Identity.Models
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public List<RefreshToken>? RefreshTokens { get; set; }
-        public string Permissions { get; set; } = "[]"; 
+        public string Permissions { get; set; } = "[]";
     }
 }

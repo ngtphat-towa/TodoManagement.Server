@@ -4,15 +4,17 @@ using Application.Features.Todos.GetAllTodos;
 using Application.Features.Todos.GetSingleTodo;
 using Application.Features.Todos.UpdateTodo;
 using Application.Features.Todos.UpdateTodoStatus;
-using Mapster;
-using MediatR;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+
 using Contracts.Todo;
-using Shared.Wrappers;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+
+using Mapster;
+
+using MediatR;
+
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+using Shared.Wrappers;
 
 namespace WebApi.Controllers
 {

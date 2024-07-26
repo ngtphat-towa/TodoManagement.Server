@@ -1,8 +1,10 @@
 ﻿using Application.Exceptions;
 using Application.Interfaces.Repositories;
 
-using Domain.Entity;
+using Domain.Entities;
+
 using MediatR;
+
 using Shared.Wrappers;
 
 namespace Application.Features.Todos.GetSingleTodo;

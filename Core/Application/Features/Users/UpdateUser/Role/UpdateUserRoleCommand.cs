@@ -1,4 +1,5 @@
 ﻿using MediatR;
+
 using Shared.Wrappers;
 
 namespace Application.Features.Users.UpdateUser.Role

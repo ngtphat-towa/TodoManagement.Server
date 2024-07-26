@@ -14,7 +14,7 @@ public record GetTodoByTitleRequest
 {
     public string Title { get; set; } = string.Empty;
 }
-public record UpdateTodoRequest 
+public record UpdateTodoRequest
 {
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;

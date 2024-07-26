@@ -1,12 +1,16 @@
 using Application;
-using Persistence;
-using Shared;
+
 using Identity;
+
+using Persistence;
+
+using Serilog;
+using Serilog.Extensions.Logging;
+
+using Shared;
 
 using WebApi;
 using WebApi.Middleware;
-using Serilog;
-using Serilog.Extensions.Logging;
 
 var logger = new LoggerConfiguration()
     .MinimumLevel.Verbose()

@@ -2,7 +2,7 @@
 
 using Contracts.Todo;
 
-using Domain.Entity;
+using Domain.Entities;
 
 using Mapster;
 

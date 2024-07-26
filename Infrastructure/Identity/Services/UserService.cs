@@ -140,7 +140,7 @@ namespace Infrastructure.Persistence.Repositories
                 _ when _userManager.IsInRoleAsync(applicationUser, Roles.SuperAdmin.ToString()).Result => Roles.SuperAdmin,
                 _ when _userManager.IsInRoleAsync(applicationUser, Roles.Admin.ToString()).Result => Roles.Admin,
                 _ when _userManager.IsInRoleAsync(applicationUser, Roles.Moderator.ToString()).Result => Roles.Moderator,
-                _ => Roles.Basic 
+                _ => Roles.Basic
             };
 
             return new User
@@ -150,7 +150,7 @@ namespace Infrastructure.Persistence.Repositories
                 LastName = applicationUser.LastName,
                 UserName = applicationUser.UserName!,
                 Email = applicationUser.Email!,
-                Role = (short)userRole, 
+                Role = (short)userRole,
                 Permissions = applicationUser.Permissions
             };
         }

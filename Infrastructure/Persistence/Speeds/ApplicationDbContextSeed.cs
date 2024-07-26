@@ -1,5 +1,5 @@
 using Domain;
-using Domain.Entity;
+using Domain.Entities;
 
 using Persistence.Context;
 

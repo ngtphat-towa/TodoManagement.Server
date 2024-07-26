@@ -1,7 +1,7 @@
 ﻿using Application.Interfaces.Services;
 
 using Domain.Common;
-using Domain.Entity;
+using Domain.Entities;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -32,7 +32,7 @@ namespace Persistence.Context
                 {
                     case EntityState.Added:
                         entry.Entity.Created = _dateTime.UtcNow;
-                        entry.Entity.CreatedBy = _authenticatedUser?.UserId?? string.Empty;
+                        entry.Entity.CreatedBy = _authenticatedUser?.UserId ?? string.Empty;
                         break;
                     case EntityState.Modified:
                         entry.Entity.LastModified = _dateTime.UtcNow;

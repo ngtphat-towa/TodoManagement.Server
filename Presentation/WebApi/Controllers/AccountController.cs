@@ -108,16 +108,79 @@ namespace WebApi.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        /// Logs out the user by invalidating the refresh token and signing them out.
+        /// </summary>
+        /// <returns>ActionResult indicating the logout status.</returns>
         [HttpPost("logout")]
+        [Authorize]
+        [ProducesResponseType(typeof(Response<string>), 200)]
+        [ProducesResponseType(typeof(Response<Unit>), 400)]
         public async Task<IActionResult> Logout()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
             if (userId == null)
             {
                 return Unauthorized();
             }
 
-            var response = await _accountService.LogoutAsync(userId);
+            var response = await _accountService.LogoutAsync(userId, GenerateIPAddress());
+            return Ok(response);
+        }
+
+
+        /// <summary>
+        /// Refreshes the JWT token using the provided refresh token.
+        /// </summary>
+        /// <param name="model">Refresh token request data.</param>
+        /// <returns>ActionResult with new tokens.</returns>
+        [HttpPost("refresh-token")]
+        [AllowAnonymous]
+        [ProducesResponseType(typeof(Response<AuthenticationResponse>), 200)]
+        [ProducesResponseType(typeof(Response<Unit>), 400)]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest tokenRequest)
+        {
+            // Retrieve the refresh token from the request headers
+            var refreshToken = tokenRequest.Token ?? Request.Cookies["refreshToken"];
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                return BadRequest("Refresh token is missing or invalid.");
+            }
+            // Refresh token
+            var response = await _accountService.RefreshTokenAsync(refreshToken, GenerateIPAddress());
+
+            return Ok(response);
+        }
+
+
+        /// <summary>
+        /// Retrieves the roles assigned to a user.
+        /// </summary>
+        /// <param name="userId">The ID of the user.</param>
+        /// <returns>ActionResult with user roles.</returns>
+        [HttpGet("roles/{userId}")]
+        [Authorize]
+        [ProducesResponseType(typeof(Response<List<string>>), 200)]
+        [ProducesResponseType(typeof(Response<Unit>), 400)]
+        public async Task<IActionResult> GetUserRoles(string userId)
+        {
+            var response = await _accountService.GetUserRolesAsync(userId);
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// Retrieves the permissions assigned to a user.
+        /// </summary>
+        /// <param name="userId">The ID of the user.</param>
+        /// <returns>ActionResult with user permissions.</returns>
+        [HttpGet("permissions/{userId}")]
+        [Authorize]
+        [ProducesResponseType(typeof(Response<List<string>>), 200)]
+        [ProducesResponseType(typeof(Response<Unit>), 400)]
+        public async Task<IActionResult> GetUserPermissions(string userId)
+        {
+            var response = await _accountService.GetUserPermissionsAsync(userId);
             return Ok(response);
         }
 
@@ -128,9 +191,10 @@ namespace WebApi.Controllers
         private string GenerateIPAddress()
         {
             if (Request.Headers.ContainsKey("X-Forwarded-For"))
-                return Request.Headers["X-Forwarded-For"]!;
-            else
-                return HttpContext.Connection.RemoteIpAddress!.MapToIPv4().ToString();
+            {
+                return Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? "Unknown";
+            }
+            return HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "Unknown";
         }
     }
 }

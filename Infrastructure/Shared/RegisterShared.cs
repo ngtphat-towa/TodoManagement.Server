@@ -20,7 +20,7 @@ public static class RegisterShared
         }
         catch (Exception ex)
         {
-            logger.LogError($"Error initializing  {nameof(Shared)} layer: {ex.Message}",ex);
+            logger.LogError($"Error initializing  {nameof(Shared)} layer: {ex.Message}", ex);
         }
         return services;
     }
