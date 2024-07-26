@@ -24,14 +24,14 @@ namespace Identity.Services
         /// <param name="user">The user for whom the refresh token is generated.</param>
         /// <returns>The generated refresh token as a string.</returns>
         Task<string> GenerateRefreshToken(ApplicationUser user);
+        Task<RefreshToken?> GetRefreshTokenAsync(string refreshToken, string? ipAddress);
 
         /// <summary>
         /// Invalidates all refresh tokens associated with the specified user.
         /// </summary>
         /// <param name="user">The user for whom to invalidate refresh tokens.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        Task InvalidateRefreshTokenAsync(ApplicationUser user);
-
+        Task RevokeRefreshTokenAsync(ApplicationUser user, string ipAddress);
         /// <summary>
         /// Validates if the specified refresh token is valid for the given user.
         /// </summary>
@@ -94,7 +94,7 @@ namespace Identity.Services
             {
                 UserId = user.Id,
                 Token = GenerateRandomToken(),
-                Expires = _dateTimeService.UtcNow.AddDays(7), // Token expiration set to 7 days
+                Expires = _dateTimeService.UtcNow.AddDays(7),
                 Created = _dateTimeService.UtcNow,
                 CreatedByIp = IpHelper.GetIpAddress()
             };
@@ -112,7 +112,7 @@ namespace Identity.Services
         /// </summary>
         /// <param name="user">The user for whom to invalidate refresh tokens.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        public async Task InvalidateRefreshTokenAsync(ApplicationUser user)
+        public async Task RevokeRefreshTokenAsync(ApplicationUser user, string ipAddress)
         {
             // Retrieve all refresh tokens for the user from database
             var refreshTokens = await _dbContext.RefreshTokens.Where(rt => rt.UserId == user.Id).ToListAsync();
@@ -121,7 +121,7 @@ namespace Identity.Services
             foreach (var refreshToken in refreshTokens)
             {
                 refreshToken.Revoked = _dateTimeService.UtcNow;
-                refreshToken.RevokedByIp = IpHelper.GetIpAddress();
+                refreshToken.RevokedByIp = ipAddress;
             }
 
             // Save changes to database
@@ -141,6 +141,23 @@ namespace Identity.Services
 
             // Check if the stored token exists and is active
             return storedToken != null && storedToken.IsActive;
+        }
+
+        /// <summary>
+        /// Retrieves a specific refresh token from the database based on user ID and token.
+        /// </summary>
+        /// <param name="userId">The ID of the user associated with the refresh token.</param>
+        /// <param name="refreshToken">The refresh token to retrieve.</param>
+        /// <returns>The refresh token if found; otherwise, null.</returns>
+        public async Task<RefreshToken?> GetRefreshTokenAsync(string refreshToken, string? ipAddress)
+        {
+            // Retrieve the refresh token from the database for the specified user and token
+            var token = await _dbContext.RefreshTokens
+                .SingleOrDefaultAsync(rt => rt.Token == refreshToken || (!string.IsNullOrEmpty(ipAddress)
+                                                                         && rt.CreatedByIp.Contains(ipAddress)));
+
+            // Return the token if found; otherwise, return null
+            return token;
         }
 
         /// <summary>
