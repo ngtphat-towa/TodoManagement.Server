@@ -7,7 +7,6 @@ using Application.Interfaces.Services;
 
 using Domain.Settings;
 
-using Identity.Context;
 using Identity.Helpers;
 using Identity.Models;
 

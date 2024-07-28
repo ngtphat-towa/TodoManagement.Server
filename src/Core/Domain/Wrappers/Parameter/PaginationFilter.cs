@@ -27,14 +27,13 @@ public record RecordPagination
 
 public class DataFilter
 {
-    public string? FileName { get; set; }
-    public string? Type { get; set; }
-    public string? Value { get; set; }
+    public string? PropertyName { get; set; }
+    public string? PropertyValue { get; set; }
 }
 
 
 public class DataSort
 {
-    public string? Selector { get; set; }
-    public bool? Descending { get; set; }
+    public string? SortBy { get; set; }
+    public bool IsDescending { get; set; }
 }

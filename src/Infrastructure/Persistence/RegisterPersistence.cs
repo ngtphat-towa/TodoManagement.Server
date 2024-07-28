@@ -68,7 +68,7 @@ namespace Persistence
 
         private static void RegisterRepositories(IServiceCollection services)
         {
-            services.AddScoped(typeof(IGenericRepositoryAsync<>), typeof(GenericRepository<>));
+            services.AddScoped(typeof(IGenericRepositoryAsync<>), typeof(GenericRepositoryAsync<>));
             services.AddTransient<ITodoRepository, TodoRepository>();
 
         }

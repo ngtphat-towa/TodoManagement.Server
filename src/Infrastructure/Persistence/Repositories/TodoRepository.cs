@@ -8,7 +8,7 @@ using Persistence.Context;
 
 namespace Persistence.Repositories;
 
-public class TodoRepository : GenericRepository<Todo>, ITodoRepository
+public class TodoRepository : GenericRepositoryAsync<Todo>, ITodoRepository
 {
     private readonly DbSet<Todo> _todos;
 
