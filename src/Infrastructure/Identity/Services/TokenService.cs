@@ -99,7 +99,7 @@ namespace Identity.Services
                 issuer: _jwtSettings.Issuer,
                 audience: _jwtSettings.Audience,
                 claims: claims,
-                expires: _dateTimeService.UtcNow.AddMinutes(_jwtSettings.DurationInMinutes),
+                expires: _dateTimeService.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationInMinutes),
                 signingCredentials: signingCredentials);
 
             // Return the JWT token as a string

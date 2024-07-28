@@ -5,6 +5,6 @@ public class JwtSettings
     public string Key { get; set; } = string.Empty;
     public string Issuer { get; set; } = string.Empty;
     public string Audience { get; set; } = string.Empty;
-    public double DurationInMinutes { get; set; }
-    public int TokenExpirationInMinutes { get; set; }
+    public double AccessTokenExpirationInMinutes { get; set; }
+    public int RefreshTokenExpirationInDays { get; set; }
 }

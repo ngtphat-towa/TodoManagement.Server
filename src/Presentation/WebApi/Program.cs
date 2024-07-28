@@ -20,10 +20,20 @@ var logger = new LoggerConfiguration()
         theme: Serilog.Sinks.SystemConsole.Themes.AnsiConsoleTheme.Literate)
     .CreateLogger();
 
-
 logger.Information("Starting web host");
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowOrigin", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
 builder.Host.UseSerilog((_, config) => config.ReadFrom.Configuration(builder.Configuration));
 ILogger<Program> MicrosoftLogger = new SerilogLoggerFactory(logger!)
@@ -44,8 +54,11 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    app.UseCors("AllowOrigin");
 }
+
+// Use CORS middleware
+app.UseCors("AllowOrigin");
+
 app.UseMiddleware<ErrorHandlerMiddleware>();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
@@ -66,8 +79,6 @@ catch (Exception ex)
 {
     MicrosoftLogger.LogError(ex, "An error occurred seeding the DB. {exceptionMessage}", ex.Message);
 }
-
-
 
 logger.Information("Web host started");
 
