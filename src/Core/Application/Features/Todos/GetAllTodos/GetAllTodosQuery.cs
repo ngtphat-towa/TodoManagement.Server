@@ -14,6 +14,7 @@ public class GetAllTodosQuery : PaginationFilter, IRequest<PagedResponse<IEnumer
 {
     public DataFilter? Filter { get; set; }
     public DataSort? Sort { get; set; }
+
 }
 
 public class GetAllTodosQueryHandler : IRequestHandler<GetAllTodosQuery, PagedResponse<IEnumerable<Todo>>>
