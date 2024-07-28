@@ -27,8 +27,8 @@ public record RecordPagination
 
 public class DataFilter
 {
-    public string? PropertyName { get; set; }
-    public string? PropertyValue { get; set; }
+    public string? FilterName { get; set; }
+    public string? FilterValue { get; set; }
 }
 
 

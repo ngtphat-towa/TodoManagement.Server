@@ -10,8 +10,9 @@ using Shared.Wrappers;
 
 namespace Application.Features.Todos.GetAllTodos;
 
-public class GetAllTodosQuery : PaginationFilter, IRequest<PagedResponse<IEnumerable<Todo>>>
+public class GetAllTodosQuery : IRequest<PagedResponse<IEnumerable<Todo>>>
 {
+    public PaginationFilter? Pagination { get; set; }
     public DataFilter? Filter { get; set; }
     public DataSort? Sort { get; set; }
 
@@ -32,11 +33,7 @@ public class GetAllTodosQueryHandler : IRequestHandler<GetAllTodosQuery, PagedRe
     {
         // Apply pagination, filtering, and sorting
         var pagedTodos = await _todoRepository.GetPagedResponseAsync(
-            new PaginationFilter
-            {
-                PageNumber = request.PageNumber,
-                PageSize = request.PageSize
-            },
+           request.Pagination,
             request.Filter,
             request.Sort);
 
@@ -45,8 +42,8 @@ public class GetAllTodosQueryHandler : IRequestHandler<GetAllTodosQuery, PagedRe
 
         return new PagedResponse<IEnumerable<Todo>>(
             todoViewModel,
-            request.PageNumber,
-            request.PageSize,
+            pagedTodos.PageNumber,
+            pagedTodos.PageSize,
             pagedTodos.TotalPages,
             pagedTodos.TotalRecords);
     }
