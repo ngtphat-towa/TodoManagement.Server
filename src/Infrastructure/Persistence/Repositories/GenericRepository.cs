@@ -28,11 +28,11 @@ namespace Persistence.Repositories
         {
             IQueryable<T> query = _dbContext.Set<T>();
 
-            if (dataFilter != null && !string.IsNullOrWhiteSpace(dataFilter.PropertyName) && !string.IsNullOrWhiteSpace(dataFilter.PropertyValue))
+            if (dataFilter != null && !string.IsNullOrWhiteSpace(dataFilter.FilterName) && !string.IsNullOrWhiteSpace(dataFilter.FilterValue))
             {
                 var parameter = Expression.Parameter(typeof(T), "x");
-                var property = Expression.Property(parameter, dataFilter.PropertyName);
-                var value = ConvertToPropertyType(property.Type, dataFilter.PropertyValue);
+                var property = Expression.Property(parameter, dataFilter.FilterName);
+                var value = ConvertToPropertyType(property.Type, dataFilter.FilterValue);
                 var equals = Expression.Equal(property, Expression.Constant(value));
                 var lambda = Expression.Lambda<Func<T, bool>>(equals, parameter);
                 query = query.Where(lambda);
@@ -43,18 +43,18 @@ namespace Persistence.Repositories
         }
 
         public async Task<PagedResponse<IReadOnlyList<T>>> GetPagedResponseAsync(
-           PaginationFilter paginationFilter,
+           PaginationFilter? paginationFilter,
            DataFilter? dataFilter,
            DataSort? dataSort)
         {
             IQueryable<T> query = _dbContext.Set<T>();
 
             // Apply filter logic
-            if (dataFilter != null && !string.IsNullOrWhiteSpace(dataFilter.PropertyName) && !string.IsNullOrWhiteSpace(dataFilter.PropertyValue))
+            if (dataFilter != null && !string.IsNullOrWhiteSpace(dataFilter.FilterName) && !string.IsNullOrWhiteSpace(dataFilter.FilterValue))
             {
                 var parameter = Expression.Parameter(typeof(T), "x");
-                var property = Expression.Property(parameter, dataFilter.PropertyName);
-                var value = ConvertToPropertyType(property.Type, dataFilter.PropertyValue);
+                var property = Expression.Property(parameter, dataFilter.FilterName);
+                var value = ConvertToPropertyType(property.Type, dataFilter.FilterValue);
                 var equals = Expression.Equal(property, Expression.Constant(value));
                 var lambda = Expression.Lambda<Func<T, bool>>(equals, parameter);
                 query = query.Where(lambda);
@@ -73,7 +73,7 @@ namespace Persistence.Repositories
             var totalRecords = await query.CountAsync();
 
             // Apply pagination logic
-            var pagedQuery = query.Skip((paginationFilter.PageNumber - 1) * paginationFilter.PageSize)
+            var pagedQuery = query.Skip((paginationFilter!.PageNumber - 1) * paginationFilter.PageSize)
                                   .Take(paginationFilter.PageSize);
 
             var items = await pagedQuery.ToListAsync();
@@ -81,7 +81,12 @@ namespace Persistence.Repositories
             // Calculate the total number of pages
             var totalPages = (int)Math.Ceiling(totalRecords / (double)paginationFilter.PageSize);
 
-            return new PagedResponse<IReadOnlyList<T>>(items, paginationFilter.PageNumber, paginationFilter.PageSize, totalRecords, totalPages);
+            return new PagedResponse<IReadOnlyList<T>>(
+                items,
+                paginationFilter.PageNumber,
+                paginationFilter.PageSize,
+                totalPages,
+                totalRecords);
         }
 
         public async Task<T> AddAsync(T entity)
