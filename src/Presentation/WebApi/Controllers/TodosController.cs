@@ -76,12 +76,16 @@ namespace WebApi.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(PagedResponse<IEnumerable<TodoResponse>>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll(
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 10,
+            [FromQuery] PaginationFilter? paginationFilter,
             [FromQuery] DataFilter? filter = null,
             [FromQuery] DataSort? sort = null)
         {
-            var query = new GetAllTodosQuery { PageNumber = page, PageSize = pageSize, Filter = filter, Sort = sort };
+            var query = new GetAllTodosQuery
+            {
+                Pagination = paginationFilter,
+                Filter = filter,
+                Sort = sort
+            };
             var response = await _mediator.Send(query);
             var todoResponses = response.Data.Adapt<IEnumerable<TodoResponse>>();
             var pagedResponse = new PagedResponse<IEnumerable<TodoResponse>>(
