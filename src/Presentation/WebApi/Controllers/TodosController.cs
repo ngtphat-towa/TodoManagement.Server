@@ -4,6 +4,7 @@ using Application.Features.Todos.GetAllTodos;
 using Application.Features.Todos.GetSingleTodo;
 using Application.Features.Todos.UpdateTodo;
 using Application.Features.Todos.UpdateTodoStatus;
+using Application.Features.Todos.GetByFilter;
 
 using Contracts.Todo;
 
@@ -69,12 +70,18 @@ namespace WebApi.Controllers
         /// </summary>
         /// <param name="page">Page number (default is 1).</param>
         /// <param name="pageSize">Number of items per page (default is 10).</param>
+        /// <param name="filter">Filter criteria.</param>
+        /// <param name="sort">Sort criteria.</param>
         /// <returns>A paged list of Todo items.</returns>
         [HttpGet]
         [ProducesResponseType(typeof(PagedResponse<IEnumerable<TodoResponse>>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAll(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] DataFilter? filter = null,
+            [FromQuery] DataSort? sort = null)
         {
-            var query = new GetAllTodosQuery { PageNumber = page, PageSize = pageSize };
+            var query = new GetAllTodosQuery { PageNumber = page, PageSize = pageSize, Filter = filter, Sort = sort };
             var response = await _mediator.Send(query);
             var todoResponses = response.Data.Adapt<IEnumerable<TodoResponse>>();
             var pagedResponse = new PagedResponse<IEnumerable<TodoResponse>>(
@@ -146,6 +153,21 @@ namespace WebApi.Controllers
                 return NotFound(response);
             }
             return Ok(response);
+        }
+
+        /// <summary>
+        /// Gets Todo items by filter.
+        /// </summary>
+        /// <param name="filter">Filter criteria.</param>
+        /// <returns>A list of Todo items that match the filter criteria.</returns>
+        [HttpGet("filter")]
+        [ProducesResponseType(typeof(Response<IEnumerable<TodoResponse>>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetByFilter([FromQuery] DataFilter filter)
+        {
+            var query = new GetByFilterQuery { Filter = filter };
+            var response = await _mediator.Send(query);
+            var todoResponses = response.Data.Adapt<IEnumerable<TodoResponse>>();
+            return Ok(Response<IEnumerable<TodoResponse>>.Success(todoResponses));
         }
     }
 }
