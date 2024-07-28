@@ -12,6 +12,7 @@ namespace Application.Features.Todos.GetAllTodos;
 
 public class GetAllTodosQuery : PaginationFilter, IRequest<PagedResponse<IEnumerable<Todo>>>
 {
+    public DataFilter? Filter { get; set; }
 }
 public class GetAllTodosQueryHandler : IRequestHandler<GetAllTodosQuery, PagedResponse<IEnumerable<Todo>>>
 {
