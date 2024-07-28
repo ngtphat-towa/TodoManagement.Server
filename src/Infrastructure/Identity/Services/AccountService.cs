@@ -326,8 +326,13 @@ namespace Identity.Services
         /// <param name="ipAddress">The IP address of the client making the request.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains an <see cref="AuthenticationResponse"/> with new authentication details.</returns>
         /// <exception cref="KeyNotFoundException">Thrown when the refresh token is invalid, inactive, or when the associated user is not found.</exception>
-        public async Task<Response<AuthenticationResponse>> RefreshTokenAsync(string token, string ipAddress)
+        public async Task<Response<AuthenticationResponse>> RefreshTokenAsync(string jwtRefreshToken, string ipAddress)
         {
+            var token = _refreshTokenService.ValidateRefreshToken(jwtRefreshToken);
+            if (string.IsNullOrEmpty(token))
+            {
+                throw new UnauthorizedAccessException();
+            }
             var existingRefreshToken = await _refreshTokenService.GetRefreshTokenAsync(token, ipAddress);
             if (existingRefreshToken == null || !existingRefreshToken.IsActive)
             {
@@ -337,7 +342,7 @@ namespace Identity.Services
             var user = await _userManager.FindByIdAsync(existingRefreshToken.UserId);
             if (user == null)
             {
-                throw new KeyNotFoundException("User associated with the refresh token not found.");
+                throw new UnauthorizedAccessException("User associated with the refresh token not found.");
             }
 
             await _refreshTokenService.RevokeRefreshTokenAsync(user, ipAddress);
