@@ -12,11 +12,15 @@ namespace Application.Features.Todos.GetAllTodos;
 
 public class GetAllTodosQuery : PaginationFilter, IRequest<PagedResponse<IEnumerable<Todo>>>
 {
+    public DataFilter? Filter { get; set; }
+    public DataSort? Sort { get; set; }
 }
+
 public class GetAllTodosQueryHandler : IRequestHandler<GetAllTodosQuery, PagedResponse<IEnumerable<Todo>>>
 {
     private readonly ITodoRepository _todoRepository;
     private readonly IMapper _mapper;
+
     public GetAllTodosQueryHandler(ITodoRepository todoRepository, IMapper mapper)
     {
         _todoRepository = todoRepository;
@@ -25,10 +29,24 @@ public class GetAllTodosQueryHandler : IRequestHandler<GetAllTodosQuery, PagedRe
 
     public async Task<PagedResponse<IEnumerable<Todo>>> Handle(GetAllTodosQuery request, CancellationToken cancellationToken)
     {
-        var validFilter = _mapper.Map<PaginationFilter>(request);
-        var todo = await _todoRepository.GetPagedResponseAsync(validFilter.PageNumber, validFilter.PageSize);
-        var record = await _todoRepository.GetCountTotalPagedResponseAsync(validFilter.PageNumber, validFilter.PageSize);
-        var todoViewModel = _mapper.Map<IEnumerable<Todo>>(todo);
-        return new PagedResponse<IEnumerable<Todo>>(todoViewModel, validFilter.PageNumber, validFilter.PageSize, record.TotalPages, record.TotalRecords);
+        // Apply pagination, filtering, and sorting
+        var pagedTodos = await _todoRepository.GetPagedResponseAsync(
+            new PaginationFilter
+            {
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize
+            },
+            request.Filter,
+            request.Sort);
+
+        // Map the resulting todos to a view model if needed (though in this case it's directly returning Todo entities)
+        var todoViewModel = _mapper.Map<IEnumerable<Todo>>(pagedTodos.Data ?? new List<Todo>());
+
+        return new PagedResponse<IEnumerable<Todo>>(
+            todoViewModel,
+            request.PageNumber,
+            request.PageSize,
+            pagedTodos.TotalPages,
+            pagedTodos.TotalRecords);
     }
 }
